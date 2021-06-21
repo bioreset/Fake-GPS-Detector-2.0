@@ -7,19 +7,17 @@ import com.dariusz.fakegpsdetector.utils.Constants.API_URL
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
+import dagger.hilt.android.components.ViewComponent
 import kotlinx.coroutines.InternalCoroutinesApi
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
-import javax.inject.Singleton
 
 @InternalCoroutinesApi
 @Module
-@InstallIn(SingletonComponent::class)
+@InstallIn(ViewComponent::class)
 object NetworkModule {
 
-    @Singleton
     @Provides
     fun provideRetrofit(): FakeGPSRestApi {
         val client = OkHttpClient.Builder().build()

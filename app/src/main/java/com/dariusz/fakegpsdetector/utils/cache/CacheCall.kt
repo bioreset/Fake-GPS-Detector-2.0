@@ -10,8 +10,8 @@ object CacheCall {
 
     suspend fun <T> safeCacheCall(
         dispatcher: CoroutineDispatcher,
-        cacheCall: suspend () -> T?
-    ): CacheStatus<T?> {
+        cacheCall: suspend () -> T
+    ): CacheStatus<T> {
         return withContext(dispatcher) {
             try {
                 withTimeout(2000) {

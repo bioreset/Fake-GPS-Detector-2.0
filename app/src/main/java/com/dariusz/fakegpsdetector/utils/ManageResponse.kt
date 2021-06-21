@@ -13,11 +13,11 @@ object ManageResponse {
 
     suspend fun manageResponse(
         response: String,
-        cacheCall: suspend (ApiResponseModelJson) -> Unit?
+        cacheCall: suspend (ApiResponseModelJson) -> Unit
     ) =
         performCacheCall(
             response.let {
-                parseResponse(it)?.let { it2 ->
+                parseResponse(it).let { it2 ->
                     cacheCall.invoke(
                         it2
                     )
@@ -34,10 +34,10 @@ object ManageResponse {
         return adapter.toJson(apiRequest)
     }
 
-    private fun parseResponse(response: String): ApiResponseModelJson? {
+    private fun parseResponse(response: String): ApiResponseModelJson {
         val adapter: JsonAdapter<ApiResponseModelJson> =
             moshi.adapter(ApiResponseModelJson::class.java)
-        return adapter.fromJson(response)
+        return adapter.fromJson(response) ?: ApiResponseModelJson(LocationData(0.0, 0.0), 0)
     }
 
     fun asResponseToDb(response: ApiResponseModelJson): ApiResponseModel {

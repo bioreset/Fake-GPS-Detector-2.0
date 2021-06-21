@@ -27,16 +27,17 @@ constructor(
         performCacheCall(locationFromApiResponse.insert(asResponseToDb(apiResponse)))
     }
 
-    private suspend fun checkCurrentLocationOfTheDevice(body: String, context: Context): String? =
+    private suspend fun checkCurrentLocationOfTheDevice(body: String, context: Context): String =
         performApiCall(fakeGPSRestApiService.checkCurrentLocation(body, context))
 
     suspend fun manageResponseAfterAction(
         cellData: List<CellTowerModel>?,
         routersData: List<RoutersListModel>?,
         context: Context
-    ): Unit? {
-        val check = checkCurrentLocationOfTheDevice(buildJSONRequest(cellData, routersData), context)
-        return manageResponse(check!!) { insertAsFresh(it) }
+    ) {
+        val check =
+            checkCurrentLocationOfTheDevice(buildJSONRequest(cellData, routersData), context)
+        return manageResponse(check) { insertAsFresh(it) }
     }
 
     suspend fun checkLocationStatus() =

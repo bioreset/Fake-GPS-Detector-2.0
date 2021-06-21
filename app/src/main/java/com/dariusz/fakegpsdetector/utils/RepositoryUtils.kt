@@ -10,12 +10,12 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @InternalCoroutinesApi
 object RepositoryUtils {
 
-    suspend fun <T> performApiCall(call: T): T? {
+    suspend fun <T> performApiCall(call: T): T {
         val safeCall = safeApiCall(IO) { call }
         return getResultFromAPI(safeCall)
     }
 
-    suspend fun <T> performCacheCall(call: T): T? {
+    suspend fun <T> performCacheCall(call: T): T {
         val safeCall = safeCacheCall(IO) { call }
         return getResultFromCache(safeCall)
     }

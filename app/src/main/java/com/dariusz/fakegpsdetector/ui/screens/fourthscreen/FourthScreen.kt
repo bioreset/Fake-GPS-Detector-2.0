@@ -52,8 +52,14 @@ fun FourthScreen(viewModel: FourthScreenViewModel = FourthScreenViewModel()) {
             .background(Color.White)
             .wrapContentSize(Alignment.Center)
     ) {
-        BaseCard("Current Location: ", "lat: ${currentLocation.latitude}, lng: ${currentLocation.longitude}")
-        BaseCard("Current Location From API: ", "lat: ${apiResponse.lat}, lng: ${apiResponse.lng}, accuracy: ${apiResponse.accuracy} ")
+        BaseCard(
+            "Current Location: ",
+            "lat: ${currentLocation.latitude}, lng: ${currentLocation.longitude}"
+        )
+        BaseCard(
+            "Current Location From API: ",
+            "lat: ${apiResponse.lat}, lng: ${apiResponse.lng}, accuracy: ${apiResponse.accuracy} "
+        )
         BaseCard("Verdict: ", verdict)
     }
 }

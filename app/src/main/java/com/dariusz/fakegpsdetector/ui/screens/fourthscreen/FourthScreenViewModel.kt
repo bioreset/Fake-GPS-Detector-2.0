@@ -43,7 +43,6 @@ constructor() : ViewModel() {
         prepareRequest(context)
         delay(2000)
         _apiResponse.value = getLocationFromApiResponseRepositoryLink(context).checkLocationStatus()
-            ?: ApiResponseModel(null, null, null, null)
     }
 
     fun getLocationDataOnce(context: Context) = viewModelScope.launch {

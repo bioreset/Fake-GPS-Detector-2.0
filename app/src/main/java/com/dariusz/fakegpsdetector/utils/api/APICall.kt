@@ -13,7 +13,7 @@ object APICall {
     suspend fun <T> safeApiCall(
         dispatcher: CoroutineDispatcher,
         apiCall: suspend () -> T
-    ): APIStatus<T?> {
+    ): APIStatus<T> {
         return withContext(dispatcher) {
             try {
                 withTimeout(6000) {
