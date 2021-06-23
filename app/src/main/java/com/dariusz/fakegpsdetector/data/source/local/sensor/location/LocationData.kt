@@ -5,8 +5,10 @@ import android.content.Context
 import android.location.Location
 import android.os.Looper
 import com.dariusz.fakegpsdetector.model.LocationModel
+import com.dariusz.fakegpsdetector.utils.RepositoryUtils.performSensorCall
 import com.google.android.gms.location.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +21,7 @@ import kotlin.coroutines.resume
 
 @SuppressLint("MissingPermission")
 @ExperimentalCoroutinesApi
+@InternalCoroutinesApi
 class LocationData
 @Inject
 constructor(
@@ -28,13 +31,19 @@ constructor(
     suspend fun getCurrentLocationLive(): Flow<LocationModel> {
         val fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(context)
-        return fusedLocationProviderClient.getCurrentLocationAsFlow()
+        return performSensorCall(
+            "get-current-location-live",
+            fusedLocationProviderClient.getCurrentLocationAsFlow()
+        )
     }
 
     suspend fun getCurrentLocationOnce(): LocationModel {
         val fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(context)
-        return fusedLocationProviderClient.getCurrentLocationOnce()
+        return performSensorCall(
+            "get-current-location-once",
+            fusedLocationProviderClient.getCurrentLocationOnce()
+        )
     }
 
     private suspend fun FusedLocationProviderClient.getCurrentLocationAsFlow(): Flow<LocationModel> =
@@ -53,13 +62,11 @@ constructor(
                     }
                 }
             }
-
             requestLocationUpdates(
                 locationRequest,
                 locationCallback,
                 Looper.getMainLooper()
             )
-
             awaitClose {
                 removeLocationUpdates(locationCallback)
             }

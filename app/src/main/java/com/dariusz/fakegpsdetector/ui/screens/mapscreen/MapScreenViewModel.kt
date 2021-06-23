@@ -1,10 +1,10 @@
-package com.dariusz.fakegpsdetector.ui.screens.secondscreen
+package com.dariusz.fakegpsdetector.ui.screens.mapscreen
 
 import android.content.Context
-import android.net.wifi.ScanResult
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dariusz.fakegpsdetector.di.NewDataSourceModule.provideWifiScanResults
+import com.dariusz.fakegpsdetector.di.NewDataSourceModule.provideLocationData
+import com.dariusz.fakegpsdetector.model.LocationModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -17,18 +17,19 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @HiltViewModel
-class SecondScreenViewModel
+class MapScreenViewModel
 @Inject
 constructor() : ViewModel() {
 
-    private var _wifiNodes = MutableStateFlow(listOf<ScanResult>())
-    val wifiNodes: StateFlow<List<ScanResult>> = _wifiNodes
+    private var _locationData = MutableStateFlow(LocationModel(0.0, 0.0))
+    val locationData: StateFlow<LocationModel> = _locationData
 
-    fun getWifiNodesDataLive(context: Context) =
+    fun getLocationLive(context: Context) =
         viewModelScope.launch {
-            provideWifiScanResults(context).getCurrentScanResultsLive().collect { list ->
-                _wifiNodes.value = list
-            }
+            provideLocationData(context)
+                .getCurrentLocationLive().collect { location ->
+                    _locationData.value = location
+                }
         }
 
 }

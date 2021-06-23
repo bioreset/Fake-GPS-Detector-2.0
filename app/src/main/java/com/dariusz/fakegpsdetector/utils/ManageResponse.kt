@@ -13,13 +13,14 @@ object ManageResponse {
 
     suspend fun manageResponse(
         response: String,
+        operation: String = "manage-response",
         cacheCall: suspend (ApiResponseModelJson) -> Unit
     ) =
-        performCacheCall(
-            response.let {
-                parseResponse(it).let { it2 ->
+        performCacheCall(operation,
+            response.let { apiResponse ->
+                parseResponse(apiResponse).let { parsedResponse ->
                     cacheCall.invoke(
-                        it2
+                        parsedResponse
                     )
                 }
             }

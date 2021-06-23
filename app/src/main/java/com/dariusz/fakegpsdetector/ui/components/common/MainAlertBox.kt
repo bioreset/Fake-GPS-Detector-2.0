@@ -1,6 +1,5 @@
 package com.dariusz.fakegpsdetector.ui.components.common
 
-import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
@@ -13,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.dariusz.fakegpsdetector.R
 import com.dariusz.fakegpsdetector.ui.MainViewModel
+import com.dariusz.fakegpsdetector.utils.Constants.permissionToWatch
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 
@@ -27,9 +27,27 @@ fun MainAlertBox(viewModel: MainViewModel = MainViewModel()) {
     val currentGPSStatus by remember(viewModel) { viewModel.gpsStatus }.collectAsState()
     val currentWifiStatus by remember(viewModel) { viewModel.wifiStatus }.collectAsState()
     val currentPermissionsStatus by remember(viewModel) { viewModel.permissionsStatus }.collectAsState()
-    if (!currentGPSStatus.status) GpsAlert(currentContext)
-    if (!currentWifiStatus.status) WifiAlert(currentContext)
-    if (!currentPermissionsStatus.status) PermissionsAlert(currentContext)
+    when (currentGPSStatus.status) {
+        true -> {
+            GpsAlert(currentContext)
+        }
+        else -> {
+        }
+    }
+    when (currentWifiStatus.status) {
+        true -> {
+            WifiAlert(currentContext)
+        }
+        else -> {
+        }
+    }
+    when (currentPermissionsStatus.status) {
+        true -> {
+            PermissionsAlert(currentContext)
+        }
+        else -> {
+        }
+    }
 }
 
 @Composable
@@ -109,10 +127,3 @@ fun PermissionsAlert(currentContext: Context) {
     }
 }
 
-val permissionToWatch = listOf(
-    Manifest.permission.ACCESS_FINE_LOCATION,
-    Manifest.permission.ACCESS_COARSE_LOCATION,
-    Manifest.permission.ACCESS_WIFI_STATE,
-    Manifest.permission.CHANGE_WIFI_STATE,
-    Manifest.permission.READ_PHONE_STATE
-)

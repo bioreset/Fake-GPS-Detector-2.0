@@ -1,4 +1,4 @@
-package com.dariusz.fakegpsdetector.ui.screens.firstscreen
+package com.dariusz.fakegpsdetector.ui.screens.mapscreen
 
 import android.content.Context
 import androidx.compose.runtime.*
@@ -16,16 +16,16 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @Composable
-fun FirstScreen(viewModel: FirstScreenViewModel = FirstScreenViewModel()) {
+fun MapScreen(viewModel: MapScreenViewModel = MapScreenViewModel()) {
     val viewModelForNavigation: MainViewModel = viewModel()
-    viewModelForNavigation.setCurrentScreen(Screens.AppScreens.FirstScreen)
+    viewModelForNavigation.setCurrentScreen(Screens.AppScreens.MapScreen)
     val currentContext = LocalContext.current
     viewModel.getLocationLive(currentContext)
     val locationState by remember(viewModel) { viewModel.locationData }.collectAsState()
-    CityMapView(locationState.latitude.toString(), locationState.longitude.toString())
     LaunchedEffect(locationState) {
         insertLocation(locationState, currentContext)
     }
+    CityMapView(locationState.latitude.toString(), locationState.longitude.toString())
 }
 
 

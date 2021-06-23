@@ -1,4 +1,4 @@
-package com.dariusz.fakegpsdetector.ui.screens.thirdscreen
+package com.dariusz.fakegpsdetector.ui.screens.celltowerscreen
 
 import android.content.Context
 import android.os.Build
@@ -19,7 +19,7 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @HiltViewModel
-class ThirdScreenViewModel
+class CellTowerScreenViewModel
 @Inject
 constructor() : ViewModel() {
 

@@ -1,37 +1,36 @@
-package com.dariusz.fakegpsdetector.utils.cache
+package com.dariusz.fakegpsdetector.utils.sensor
 
 import com.dariusz.fakegpsdetector.utils.ErrorHandling.handleError
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
 
-object CacheCall {
+object SensorCall {
 
-    suspend fun <T> safeCacheCall(
+    suspend fun <T> safeSensorCall(
         dispatcher: CoroutineDispatcher,
         operation: String,
-        cacheCall: suspend () -> T
-    ): CacheStatus<T> {
+        sensorCall: suspend () -> T
+    ): SensorStatus<T> {
         return withContext(dispatcher) {
             try {
                 withTimeout(2000) {
-                    CacheStatus.Success(cacheCall.invoke())
+                    SensorStatus.Success(sensorCall.invoke())
                 }
             } catch (throwable: Throwable) {
                 when (throwable) {
-                    is TimeoutCancellationException -> {
-                        CacheStatus.CacheError(
+                    is AccessDeniedException -> {
+                        SensorStatus.SensorError(
                             handleError(
-                                "cache-error: $operation",
-                                "TimeoutCancellationException Exception"
+                                "sensor-error: $operation",
+                                "AccessDeniedException Exception"
                             )
                         )
                     }
                     else -> {
-                        CacheStatus.CacheError(
+                        SensorStatus.SensorError(
                             handleError(
-                                "cache-error: $operation",
+                                "sensor-error: $operation",
                                 "Unknown Error: $throwable"
                             )
                         )
@@ -40,4 +39,5 @@ object CacheCall {
             }
         }
     }
+
 }

@@ -7,7 +7,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.telephony.CellInfo
 import android.telephony.TelephonyManager
+import com.dariusz.fakegpsdetector.utils.RepositoryUtils.performSensorCall
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -20,13 +22,16 @@ import kotlin.coroutines.resume
 
 @SuppressLint("MissingPermission")
 @ExperimentalCoroutinesApi
+@InternalCoroutinesApi
 class CellTowersData
 @Inject
 constructor(private val context: Context) {
 
-    suspend fun getCurrentCellTowersOnce() = context.getCurrentCellTowers()
+    suspend fun getCurrentCellTowersOnce() =
+        performSensorCall("get-current-cell-towers-once", context.getCurrentCellTowers())
 
-    suspend fun getCurrentCellTowersLive() = context.getCurrentCellTowersAsFlow()
+    suspend fun getCurrentCellTowersLive() =
+        performSensorCall("get-current-cell-towers-live", context.getCurrentCellTowersAsFlow())
 
     private suspend fun Context.getCurrentCellTowers(): List<CellInfo> {
         val telephonyManager: TelephonyManager =
@@ -40,21 +45,20 @@ constructor(private val context: Context) {
                     }
                 }
             }
-            continuation.invokeOnCancellation {
-                unregisterReceiver(wifiScanReceiver)
-            }
             registerReceiver(
                 wifiScanReceiver,
                 IntentFilter(TelephonyManager.ACTION_PHONE_STATE_CHANGED)
             )
-            telephonyManager.allCellInfo
+            continuation.invokeOnCancellation {
+                unregisterReceiver(wifiScanReceiver)
+            }
         }
     }
 
     private suspend fun Context.getCurrentCellTowersAsFlow(): Flow<List<CellInfo>> {
         val telephonyManager: TelephonyManager =
             getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        return callbackFlow<List<CellInfo>> {
+        return callbackFlow {
             val wifiScanReceiver = object : BroadcastReceiver() {
                 override fun onReceive(c: Context, intent: Intent) {
                     if (intent.action == TelephonyManager.ACTION_PHONE_STATE_CHANGED) {

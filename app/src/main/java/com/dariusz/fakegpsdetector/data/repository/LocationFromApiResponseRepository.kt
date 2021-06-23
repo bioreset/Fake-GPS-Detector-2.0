@@ -23,12 +23,21 @@ constructor(
 ) {
 
     private suspend fun insertAsFresh(apiResponse: ApiResponseModelJson) {
-        performCacheCall(locationFromApiResponse.deleteAllLocationFromApiRecords())
-        performCacheCall(locationFromApiResponse.insert(asResponseToDb(apiResponse)))
+        performCacheCall(
+            "delete-all-location-from-api-records",
+            locationFromApiResponse.deleteAllLocationFromApiRecords()
+        )
+        performCacheCall(
+            "insert-api-response-to-db",
+            locationFromApiResponse.insert(asResponseToDb(apiResponse))
+        )
     }
 
     private suspend fun checkCurrentLocationOfTheDevice(body: String, context: Context): String =
-        performApiCall(fakeGPSRestApiService.checkCurrentLocation(body, context))
+        performApiCall(
+            "check-current-location-api-call",
+            fakeGPSRestApiService.checkCurrentLocation(body, context)
+        )
 
     suspend fun manageResponseAfterAction(
         cellData: List<CellTowerModel>?,
@@ -41,5 +50,8 @@ constructor(
     }
 
     suspend fun checkLocationStatus() =
-        performCacheCall(locationFromApiResponse.getLocationFromApiInfo())
+        performCacheCall(
+            "select-location-from-api-response-from-db",
+            locationFromApiResponse.getLocationFromApiInfo()
+        )
 }

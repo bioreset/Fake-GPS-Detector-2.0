@@ -17,6 +17,3 @@ fun ThemeColor.getColors(darkTheme: Boolean): Color = when (this) {
     ThemeColor.Red -> if (!darkTheme) Color(0xFFB00020) else Color(0xFFCF6679)
     ThemeColor.Yellow -> if (!darkTheme) Color(0xFFFFEB3B) else Color(0xFFFFF59D)
 }
-
-val primaryColor: ThemeColor = ThemeColor.Purple
-val secondaryColor: ThemeColor = ThemeColor.Blue

@@ -6,7 +6,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
+import com.dariusz.fakegpsdetector.utils.RepositoryUtils.performSensorCall
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -18,18 +20,22 @@ import javax.inject.Inject
 import kotlin.coroutines.resume
 
 @ExperimentalCoroutinesApi
+@InternalCoroutinesApi
 class WifiScanResultsData
 @Inject
 constructor(
     private val context: Context
 ) {
 
-    suspend fun getCurrentScanResultsOnce() = context.getCurrentScanResults()
+    suspend fun getCurrentScanResultsOnce() =
+        performSensorCall("get-current-scan-results-once", context.getCurrentScanResults())
 
-    suspend fun getCurrentScanResultsLive() = context.getCurrentScanResultsAsFlow()
+    suspend fun getCurrentScanResultsLive() =
+        performSensorCall("get-current-scan-results-live", context.getCurrentScanResultsAsFlow())
 
     private suspend fun Context.getCurrentScanResults(): List<ScanResult> {
-        val wifiManager = getSystemService(Context.WIFI_SERVICE) as? WifiManager ?: return listOf()
+        val wifiManager =
+            getSystemService(Context.WIFI_SERVICE) as? WifiManager ?: return listOf()
         return suspendCancellableCoroutine { continuation ->
             val wifiScanReceiver = object : BroadcastReceiver() {
                 override fun onReceive(c: Context, intent: Intent) {
@@ -50,12 +56,12 @@ constructor(
     }
 
     private suspend fun Context.getCurrentScanResultsAsFlow(): Flow<List<ScanResult>> {
-        val wifiManager = getSystemService(Context.WIFI_SERVICE) as? WifiManager
-        return callbackFlow<List<ScanResult>> {
+        val wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
+        return callbackFlow {
             val wifiScanReceiver = object : BroadcastReceiver() {
                 override fun onReceive(c: Context, intent: Intent) {
                     if (intent.action == WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) {
-                        wifiManager?.scanResults?.let { trySend(it).isSuccess }
+                        wifiManager.scanResults.let { trySend(it).isSuccess }
                     }
                 }
             }

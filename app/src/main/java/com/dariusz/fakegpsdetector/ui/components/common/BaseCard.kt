@@ -1,8 +1,8 @@
 package com.dariusz.fakegpsdetector.ui.components.common
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -19,64 +19,54 @@ private val textColumnStyle = SpanStyle(fontWeight = FontWeight.Bold)
 
 @Composable
 fun CardWifiNodes(
-    list: List<RoutersListModel>
+    listContent: List<RoutersListModel>
 ) {
-    Card(
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                bottom = 6.dp,
-                top = 6.dp,
+                bottom = 55.dp
             ),
-        elevation = 10.dp
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp)
     ) {
-        Column {
-            list.forEach { item ->
-                BaseCard("SSID: ", item.ssid ?: "")
-                BaseCard("MAC Address: ", item.macAddress)
-                BaseCard("Frequency: ", item.frequency.toString())
-                BaseCard("Level: ", item.level.toString())
-            }
+        items(listContent) { listContent ->
+            BaseCard("SSID: ", listContent.ssid ?: "")
+            BaseCard("MAC Address: ", listContent.macAddress)
+            BaseCard("Frequency: ", listContent.frequency.toString())
+            BaseCard("Level: ", listContent.level.toString())
+            BaseCard("Channel: ", listContent.channel.toString())
+            BaseCard("Quality: ", listContent.qualityOfConnection ?: "N/A")
         }
     }
 }
 
 @Composable
 fun CardCellTowers(
-    list: List<CellTowerModel>
+    listContent: List<CellTowerModel>
 ) {
-    Card(
+    LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .padding(
-                bottom = 6.dp,
-                top = 6.dp,
+                bottom = 55.dp
             ),
-        elevation = 10.dp
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp)
     ) {
-        Column {
-            list.forEach { item ->
-                BaseCard("Cell ID: ", item.cellId)
-                BaseCard("Location Area Code: ", item.locationAreaCode.toString())
-                BaseCard("Mobile Country Code: ", item.mobileCountryCode.toString())
-                BaseCard("Mobile Network Code: ", item.mobileNetworkCode.toString())
-                BaseCard("Signal Strength", item.signalStrength.toString())
-            }
+        items(listContent) { listContent ->
+            BaseCard("Cell ID: ", listContent.cellId)
+            BaseCard("Location Area Code: ", listContent.locationAreaCode.toString())
+            BaseCard("Mobile Country Code: ", listContent.mobileCountryCode.toString())
+            BaseCard("Mobile Network Code: ", listContent.mobileNetworkCode.toString())
+            BaseCard("Signal Strength", listContent.signalStrength.toString())
         }
     }
 }
 
 @Composable
 fun BaseCard(title: String, content: String, style: SpanStyle = textColumnStyle) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(
-                bottom = 6.dp,
-                top = 6.dp,
-            ),
-        elevation = 10.dp
-    ) {
+    Card {
         Column {
             Text(
                 buildAnnotatedString {

@@ -1,4 +1,4 @@
-package com.dariusz.fakegpsdetector.ui.screens.fourthscreen
+package com.dariusz.fakegpsdetector.ui.screens.infoscreen
 
 import android.content.Context
 import android.os.Build
@@ -15,11 +15,10 @@ import com.dariusz.fakegpsdetector.model.LocationModel
 import com.dariusz.fakegpsdetector.model.RoutersListModel
 import com.dariusz.fakegpsdetector.model.RoutersListModel.Companion.newRoutersList
 import com.dariusz.fakegpsdetector.utils.CellTowersUtils.mapCellTowers
-import com.dariusz.fakegpsdetector.utils.Injectors.getLocationFromApiResponseRepository
+import com.dariusz.fakegpsdetector.utils.Injectors
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -29,47 +28,63 @@ import javax.inject.Inject
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @HiltViewModel
-class FourthScreenViewModel
+class InfoScreenViewModel
 @Inject
 constructor() : ViewModel() {
-
-    private var _apiResponse = MutableStateFlow(ApiResponseModel(null, null, null, null))
-    val apiResponse: StateFlow<ApiResponseModel> = _apiResponse
 
     private var _currentLocation = MutableStateFlow(LocationModel(0.0, 0.0))
     val currentLocation: StateFlow<LocationModel> = _currentLocation
 
+    private var _currentRouters = MutableStateFlow(listOf<RoutersListModel>())
+    val currentRouters: StateFlow<List<RoutersListModel>> = _currentRouters
+
+    private var _currentCellTowers = MutableStateFlow(listOf<CellTowerModel>())
+    val currentCellTowers: StateFlow<List<CellTowerModel>> = _currentCellTowers
+
+    private var _apiResponse = MutableStateFlow(ApiResponseModel(null, null, null, null))
+    val apiResponse: StateFlow<ApiResponseModel> = _apiResponse
+
+    fun initScreenTasks(context: Context) {
+        getLocationDataOnce(context)
+        getCellTowersDataOnce(context)
+        getWifiNodesDataOnce(context)
+    }
+
     fun getLocationFromApisResponse(context: Context) = viewModelScope.launch {
-        prepareRequest(context)
-        delay(2000)
         _apiResponse.value = getLocationFromApiResponseRepositoryLink(context).checkLocationStatus()
     }
 
-    fun getLocationDataOnce(context: Context) = viewModelScope.launch {
+    fun manageTheResponse(
+        context: Context,
+        cells: List<CellTowerModel>,
+        wifis: List<RoutersListModel>
+    ) =
+        viewModelScope.launch {
+            getLocationFromApiResponseRepositoryLink(context).manageResponseAfterAction(
+                cells,
+                wifis,
+                context
+            )
+        }
+
+    private fun getLocationDataOnce(context: Context) = viewModelScope.launch {
         _currentLocation.value = provideLocationData(context).getCurrentLocationOnce()
     }
 
-    private fun prepareRequest(context: Context) = viewModelScope.launch {
-        getLocationFromApiResponseRepositoryLink(context).manageResponseAfterAction(
-            getCellTowersDataOnce(context),
-            getWifiNodesDataOnce(context),
-            context
-        )
+    private fun getCellTowersDataOnce(context: Context) = viewModelScope.launch {
+        val provideData = provideCellTowersData(context)
+        val cellInfoList = provideData.getCurrentCellTowersOnce()
+        _currentCellTowers.value = mapCellTowers(cellInfoList)
+    }
+
+    private fun getWifiNodesDataOnce(context: Context) = viewModelScope.launch {
+        val provideData = provideWifiScanResults(context)
+        val scanResultList = provideData.getCurrentScanResultsOnce()
+        _currentRouters.value = newRoutersList(scanResultList)
     }
 
     private fun getLocationFromApiResponseRepositoryLink(context: Context): LocationFromApiResponseRepository {
-        return getLocationFromApiResponseRepository(context)
+        return Injectors.getLocationFromApiResponseRepository(context)
     }
 
-    private suspend fun getCellTowersDataOnce(context: Context): List<CellTowerModel> {
-        val provideData = provideCellTowersData(context)
-        val cellInfoList = provideData.getCurrentCellTowersOnce()
-        return mapCellTowers(cellInfoList)
-    }
-
-    private suspend fun getWifiNodesDataOnce(context: Context): List<RoutersListModel> {
-        val provideData = provideWifiScanResults(context)
-        val scanResultList = provideData.getCurrentScanResultsOnce()
-        return newRoutersList(scanResultList)
-    }
 }

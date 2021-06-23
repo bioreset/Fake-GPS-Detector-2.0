@@ -14,16 +14,16 @@ sealed class Screens(val route: String, val title: String) {
         route,
         title
     ) {
-        object FirstScreen : AppScreens("home", "Home", Icons.Filled.Home)
-        object SecondScreen : AppScreens("routers", "Routers", Icons.Filled.Home)
-        object ThirdScreen : AppScreens("celltowers", "Cell Towers", Icons.Filled.Home)
-        object FourthScreen : AppScreens("info", "Info", Icons.Filled.Home)
+        object MapScreen : AppScreens("home", "Home", Icons.Filled.Home)
+        object RouterScreen : AppScreens("routers", "Routers", Icons.Filled.Home)
+        object CellTowerScreen : AppScreens("celltowers", "Cell Towers", Icons.Filled.Home)
+        object InfoScreen : AppScreens("info", "Info", Icons.Filled.Home)
     }
 }
 
 val screensBottomNav = listOf(
-    Screens.AppScreens.FirstScreen,
-    Screens.AppScreens.SecondScreen,
-    Screens.AppScreens.ThirdScreen,
-    Screens.AppScreens.FourthScreen
+    Screens.AppScreens.MapScreen,
+    Screens.AppScreens.RouterScreen,
+    Screens.AppScreens.CellTowerScreen,
+    Screens.AppScreens.InfoScreen
 )

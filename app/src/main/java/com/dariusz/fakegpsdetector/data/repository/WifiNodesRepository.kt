@@ -14,10 +14,10 @@ constructor(
 ) {
 
     suspend fun insertAsFresh(routerList: List<RoutersListModel>) {
-        performCacheCall(routersListDao.deleteAllRouters())
-        performCacheCall(routersListDao.insertAll(routerList))
+        performCacheCall("delete-all-routers-from-db", routersListDao.deleteAllRouters())
+        performCacheCall("insert-all-routers-to-db", routersListDao.insertAll(routerList))
     }
 
     suspend fun selectAll() =
-        performCacheCall(routersListDao.getAllRouters())
+        performCacheCall("select-all-routers-from-db", routersListDao.getAllRouters())
 }

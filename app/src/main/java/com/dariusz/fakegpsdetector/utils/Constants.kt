@@ -1,7 +1,9 @@
 package com.dariusz.fakegpsdetector.utils
 
+import android.Manifest
 import android.content.Context
 import com.dariusz.fakegpsdetector.R
+import kotlinx.coroutines.Dispatchers
 
 object Constants {
 
@@ -12,7 +14,26 @@ object Constants {
 
     // ROOM SETUP
     const val DB_NAME = "fgd_database_final"
-    const val DB_VER = 1
+    const val DB_VER = 2
 
+    // GEOLOCATION API SETUP
     fun getApiKey(context: Context) = context.getString(R.string.google_maps_api_key)
+
+    // PERMISSION SETUP
+    val permissionToWatch = listOf(
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_WIFI_STATE,
+        Manifest.permission.CHANGE_WIFI_STATE,
+        Manifest.permission.READ_PHONE_STATE
+    )
+
+    // MAP SETUP
+    const val InitialZoom = 20F
+    const val MinZoom = 2F
+    const val MaxZoom = 60F
+
+    // DISPATCHERS
+    val dispatcherForSafeCalls = Dispatchers.IO
+
 }

@@ -14,9 +14,9 @@ constructor(
 ) {
 
     suspend fun insertAsFresh(location: LocationModel) {
-        performCacheCall(locationDao.deleteAllLocationInfo())
-        performCacheCall(locationDao.insert(location))
+        performCacheCall("delete-all-location-info", locationDao.deleteAllLocationInfo())
+        performCacheCall("insert-all-location-to-db", locationDao.insert(location))
     }
 
-    suspend fun selectAll() = performCacheCall(locationDao.getLocation())
+    suspend fun selectAll() = performCacheCall("select-location-from-db", locationDao.getLocation())
 }

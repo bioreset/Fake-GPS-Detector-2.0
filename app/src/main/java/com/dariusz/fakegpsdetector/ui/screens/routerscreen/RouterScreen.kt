@@ -1,4 +1,4 @@
-package com.dariusz.fakegpsdetector.ui.screens.secondscreen
+package com.dariusz.fakegpsdetector.ui.screens.routerscreen
 
 import android.content.Context
 import androidx.compose.runtime.*
@@ -17,19 +17,19 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @Composable
-fun SecondScreen(viewModel: SecondScreenViewModel = SecondScreenViewModel()) {
+fun RouterScreen(viewModel: RouterScreenViewModel = RouterScreenViewModel()) {
     val viewModelForNavigation: MainViewModel = viewModel()
-    viewModelForNavigation.setCurrentScreen(Screens.AppScreens.SecondScreen)
+    viewModelForNavigation.setCurrentScreen(Screens.AppScreens.RouterScreen)
     val currentContext = LocalContext.current
     viewModel.getWifiNodesDataLive(currentContext)
     val wifiNodesState by remember(viewModel) { viewModel.wifiNodes }.collectAsState()
-    CardWifiNodes(newRoutersList(wifiNodesState))
     LaunchedEffect(wifiNodesState) {
         if (wifiNodesState.isNotEmpty()) insertWifiNodes(
             newRoutersList(wifiNodesState),
             currentContext
         )
     }
+    CardWifiNodes(newRoutersList(wifiNodesState))
 }
 
 @InternalCoroutinesApi

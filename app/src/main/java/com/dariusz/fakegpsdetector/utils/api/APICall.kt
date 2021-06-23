@@ -12,6 +12,7 @@ object APICall {
 
     suspend fun <T> safeApiCall(
         dispatcher: CoroutineDispatcher,
+        operation: String,
         apiCall: suspend () -> T
     ): APIStatus<T> {
         return withContext(dispatcher) {
@@ -25,14 +26,14 @@ object APICall {
                     is TimeoutCancellationException -> {
                         APIStatus.NetworkError(
                             handleError(
-                                "api-network-error",
+                                "api-network-error: $operation",
                                 "TimeoutCancellationException Exception"
                             )
                         )
                     }
                     is IOException -> {
                         APIStatus.NetworkError(
-                            handleError("api-network-error", "I/O Exception")
+                            handleError("api-network-error: $operation", "I/O Exception")
                         )
                     }
                     is HttpException -> {
@@ -43,14 +44,14 @@ object APICall {
                             )
                         APIStatus.APIError(
                             handleError(
-                                "api-http-error",
+                                "api-http-error: $operation",
                                 "Error code: $code; Error response: $errorResponse"
                             )
                         )
                     }
                     else -> {
                         APIStatus.APIError(
-                            handleError("api-error", "Unknown Error")
+                            handleError("api-error: $operation", "Unknown Error: $throwable")
                         )
                     }
                 }

@@ -10,6 +10,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewComponent
 import kotlinx.coroutines.InternalCoroutinesApi
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
@@ -20,7 +21,14 @@ object NetworkModule {
 
     @Provides
     fun provideRetrofit(): FakeGPSRestApi {
-        val client = OkHttpClient.Builder().build()
+        val client = OkHttpClient.Builder()
+            .addInterceptor(
+                HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC).setLevel
+                    (HttpLoggingInterceptor.Level.BODY)
+                    .setLevel(HttpLoggingInterceptor.Level.HEADERS)
+            )
+            .build()
+
         return Retrofit.Builder()
             .baseUrl(API_URL)
             .addConverterFactory(ScalarsConverterFactory.create())

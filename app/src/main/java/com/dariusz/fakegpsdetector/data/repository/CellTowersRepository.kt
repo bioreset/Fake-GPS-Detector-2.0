@@ -13,10 +13,10 @@ constructor(
     private val cellTowersDao: CellTowersDao
 ) {
     suspend fun insertAsFresh(cellTowerList: List<CellTowerModel>) {
-        performCacheCall(cellTowersDao.deleteAllCellTowers())
-        performCacheCall(cellTowersDao.insertAll(cellTowerList))
+        performCacheCall("delete-all-cell-towers-in-db", cellTowersDao.deleteAllCellTowers())
+        performCacheCall("insert-all-cell-towers-to-db", cellTowersDao.insertAll(cellTowerList))
     }
 
     suspend fun selectAll() =
-        performCacheCall(cellTowersDao.getAllCellTowers())
+        performCacheCall("select-all-cell-towers-from-db", cellTowersDao.getAllCellTowers())
 }

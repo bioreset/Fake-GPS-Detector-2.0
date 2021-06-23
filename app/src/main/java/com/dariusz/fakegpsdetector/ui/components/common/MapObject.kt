@@ -19,6 +19,9 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.dariusz.fakegpsdetector.R
+import com.dariusz.fakegpsdetector.utils.Constants.InitialZoom
+import com.dariusz.fakegpsdetector.utils.Constants.MaxZoom
+import com.dariusz.fakegpsdetector.utils.Constants.MinZoom
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.MapView
 import com.google.android.gms.maps.model.LatLng
@@ -129,7 +132,3 @@ private fun ZoomButton(text: String, onClick: () -> Unit) {
         Text(text = text, style = MaterialTheme.typography.h5)
     }
 }
-
-private const val InitialZoom = 18F
-const val MinZoom = 2F
-const val MaxZoom = 20F

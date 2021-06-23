@@ -28,7 +28,7 @@ class MainViewModel
 @Inject
 constructor() : ViewModel() {
 
-    private val _currentScreen = MutableLiveData<Screens>(Screens.AppScreens.FirstScreen)
+    private val _currentScreen = MutableLiveData<Screens>(Screens.AppScreens.MapScreen)
     val currentScreen: LiveData<Screens> = _currentScreen
 
     fun setCurrentScreen(screen: Screens) {
