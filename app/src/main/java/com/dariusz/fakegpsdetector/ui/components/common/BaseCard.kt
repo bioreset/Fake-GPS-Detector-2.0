@@ -3,9 +3,12 @@ package com.dariusz.fakegpsdetector.ui.components.common
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -19,8 +22,14 @@ private val textColumnStyle = SpanStyle(fontWeight = FontWeight.Bold)
 
 @Composable
 fun CardWifiNodes(
-    listContent: List<RoutersListModel>
+    listOfWifiNodes: List<RoutersListModel>
 ) {
+    val emptyList =
+        listOf(
+            RoutersListModel("", "", 0, 0, 0, "")
+        )
+    val openBox = remember { mutableStateOf(false) }
+    val currentItemToShow = remember { mutableStateOf(emptyList[0]) }
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
@@ -30,21 +39,39 @@ fun CardWifiNodes(
         verticalArrangement = Arrangement.spacedBy(20.dp),
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp)
     ) {
-        items(listContent) { listContent ->
+        items(items = listOfWifiNodes) { listContent ->
             BaseCard("SSID: ", listContent.ssid ?: "")
             BaseCard("MAC Address: ", listContent.macAddress)
             BaseCard("Frequency: ", listContent.frequency.toString())
             BaseCard("Level: ", listContent.level.toString())
             BaseCard("Channel: ", listContent.channel.toString())
             BaseCard("Quality: ", listContent.qualityOfConnection ?: "N/A")
+            Button(
+                onClick = {
+                    openBox.value = true
+                    currentItemToShow.value = listContent
+                },
+                modifier = Modifier.padding(
+                    end = 10.dp, bottom = 10.dp, top = 10.dp
+                )
+            ) {
+                Text("Info")
+            }
         }
     }
+    if (openBox.value) WifiNodeDetailBox(currentItemToShow.value)
 }
 
 @Composable
 fun CardCellTowers(
-    listContent: List<CellTowerModel>
+    listOfCellTowers: List<CellTowerModel>
 ) {
+    val emptyList = listOf(
+        CellTowerModel("", 0, "", "", 0)
+    )
+    val openBox = remember { mutableStateOf(false) }
+    val currentItemToShow = remember { mutableStateOf(emptyList[0]) }
+
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
@@ -52,20 +79,36 @@ fun CardCellTowers(
                 bottom = 55.dp
             ),
         verticalArrangement = Arrangement.spacedBy(20.dp),
-        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp)
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
     ) {
-        items(listContent) { listContent ->
+        items(items = listOfCellTowers) { listContent ->
             BaseCard("Cell ID: ", listContent.cellId)
             BaseCard("Location Area Code: ", listContent.locationAreaCode.toString())
             BaseCard("Mobile Country Code: ", listContent.mobileCountryCode.toString())
             BaseCard("Mobile Network Code: ", listContent.mobileNetworkCode.toString())
-            BaseCard("Signal Strength", listContent.signalStrength.toString())
+            BaseCard("Signal Strength: ", listContent.signalStrength.toString())
+            Button(
+                onClick = {
+                    openBox.value = true
+                    currentItemToShow.value = listContent
+                },
+                modifier = Modifier.padding(
+                    end = 10.dp, bottom = 10.dp, top = 10.dp
+                )
+            ) {
+                Text("Info")
+            }
         }
     }
+    if (openBox.value) CellTowerDetailBox(currentItemToShow.value)
 }
 
 @Composable
-fun BaseCard(title: String, content: String, style: SpanStyle = textColumnStyle) {
+fun BaseCard(
+    title: String,
+    content: String,
+    style: SpanStyle = textColumnStyle
+) {
     Card {
         Column {
             Text(

@@ -1,7 +1,10 @@
 package com.dariusz.fakegpsdetector.di
 
 import android.content.Context
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.dariusz.fakegpsdetector.data.source.local.sensor.celltowers.CellTowersData
+import com.dariusz.fakegpsdetector.data.source.local.sensor.celltowers.CellTowersDataAPI29Plus
 import com.dariusz.fakegpsdetector.data.source.local.sensor.location.LocationData
 import com.dariusz.fakegpsdetector.data.source.local.sensor.requirements.GpsStatusData
 import com.dariusz.fakegpsdetector.data.source.local.sensor.requirements.PermissionsStatusData
@@ -26,6 +29,15 @@ object NewDataSourceModule {
     @Provides
     fun provideCellTowersData(@ApplicationContext context: Context): CellTowersData {
         return CellTowersData(
+            context
+        )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    @ViewModelScoped
+    @Provides
+    fun provideCellTowersDataApi29Plus(@ApplicationContext context: Context): CellTowersDataAPI29Plus {
+        return CellTowersDataAPI29Plus(
             context
         )
     }

@@ -23,11 +23,11 @@ object NetworkModule {
     fun provideRetrofit(): FakeGPSRestApi {
         val client = OkHttpClient.Builder()
             .addInterceptor(
-                HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC).setLevel
-                    (HttpLoggingInterceptor.Level.BODY)
+                HttpLoggingInterceptor()
+                    .setLevel(HttpLoggingInterceptor.Level.BASIC)
+                    .setLevel(HttpLoggingInterceptor.Level.BODY)
                     .setLevel(HttpLoggingInterceptor.Level.HEADERS)
-            )
-            .build()
+            ).build()
 
         return Retrofit.Builder()
             .baseUrl(API_URL)

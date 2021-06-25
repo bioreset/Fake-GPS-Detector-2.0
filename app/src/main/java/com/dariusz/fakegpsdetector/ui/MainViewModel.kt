@@ -1,8 +1,6 @@
 package com.dariusz.fakegpsdetector.ui
 
 import android.content.Context
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dariusz.fakegpsdetector.di.NewDataSourceModule.provideGPSStatus
@@ -11,7 +9,7 @@ import com.dariusz.fakegpsdetector.di.NewDataSourceModule.provideWifiStatus
 import com.dariusz.fakegpsdetector.model.GpsStatusModel
 import com.dariusz.fakegpsdetector.model.PermissionStatusModel
 import com.dariusz.fakegpsdetector.model.WifiStatusModel
-import com.dariusz.fakegpsdetector.ui.components.navigation.Screens
+import com.dariusz.fakegpsdetector.utils.Constants.permissionToWatch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -21,19 +19,13 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @HiltViewModel
-@ExperimentalCoroutinesApi
 class MainViewModel
 @Inject
-constructor() : ViewModel() {
-
-    private val _currentScreen = MutableLiveData<Screens>(Screens.AppScreens.MapScreen)
-    val currentScreen: LiveData<Screens> = _currentScreen
-
-    fun setCurrentScreen(screen: Screens) {
-        _currentScreen.value = screen
-    }
+constructor(
+) : ViewModel() {
 
     private var _gpsStatus = MutableStateFlow(GpsStatusModel(false))
     val gpsStatus: StateFlow<GpsStatusModel> = _gpsStatus
@@ -44,7 +36,13 @@ constructor() : ViewModel() {
     private var _wifiStatus = MutableStateFlow(WifiStatusModel(false))
     val wifiStatus: StateFlow<WifiStatusModel> = _wifiStatus
 
-    fun getGPSStatus(context: Context) =
+    fun initViewModel(context: Context) {
+        getGPSStatus(context)
+        getPermissionsStatus(context, permissionToWatch)
+        getWifiNetworkStatus(context)
+    }
+
+    private fun getGPSStatus(context: Context) =
         viewModelScope.launch {
             provideGPSStatus(context)
                 .getLiveGPSStatus().collect { status ->
@@ -52,7 +50,7 @@ constructor() : ViewModel() {
                 }
         }
 
-    fun getPermissionsStatus(
+    private fun getPermissionsStatus(
         context: Context,
         permissionsToListen: List<String>
     ) = viewModelScope.launch {
@@ -62,7 +60,7 @@ constructor() : ViewModel() {
             }
     }
 
-    fun getWifiNetworkStatus(context: Context) =
+    private fun getWifiNetworkStatus(context: Context) =
         viewModelScope.launch {
             provideWifiStatus(context)
                 .getLiveWifiStatus().collect { status ->

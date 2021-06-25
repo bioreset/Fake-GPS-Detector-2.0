@@ -21,33 +21,16 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @Composable
 fun MainAlertBox(viewModel: MainViewModel = MainViewModel()) {
     val currentContext = LocalContext.current
-    viewModel.getGPSStatus(currentContext)
-    viewModel.getWifiNetworkStatus(currentContext)
-    viewModel.getPermissionsStatus(currentContext, permissionToWatch)
+    val currentCoroutineScope = rememberCoroutineScope()
+    LaunchedEffect(currentCoroutineScope) {
+        viewModel.initViewModel(currentContext)
+    }
     val currentGPSStatus by remember(viewModel) { viewModel.gpsStatus }.collectAsState()
     val currentWifiStatus by remember(viewModel) { viewModel.wifiStatus }.collectAsState()
     val currentPermissionsStatus by remember(viewModel) { viewModel.permissionsStatus }.collectAsState()
-    when (currentGPSStatus.status) {
-        true -> {
-            GpsAlert(currentContext)
-        }
-        else -> {
-        }
-    }
-    when (currentWifiStatus.status) {
-        true -> {
-            WifiAlert(currentContext)
-        }
-        else -> {
-        }
-    }
-    when (currentPermissionsStatus.status) {
-        true -> {
-            PermissionsAlert(currentContext)
-        }
-        else -> {
-        }
-    }
+    if (!currentGPSStatus.status) GpsAlert(currentContext)
+    if (!currentWifiStatus.status) WifiAlert(currentContext)
+    if (!currentPermissionsStatus.status) PermissionsAlert(currentContext)
 }
 
 @Composable
@@ -126,4 +109,3 @@ fun PermissionsAlert(currentContext: Context) {
         )
     }
 }
-

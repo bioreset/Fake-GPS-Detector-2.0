@@ -5,7 +5,6 @@ import androidx.annotation.RequiresApi
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -27,10 +26,8 @@ fun FGDApp() {
     val navController = rememberNavController()
     val theme by rememberSaveable(stateSaver = ThemeSaver) { mutableStateOf(CurrentTheme()) }
     val mainViewModel: MainViewModel = viewModel()
-    val currentScreen by mainViewModel.currentScreen.observeAsState()
     MainTheme(theme = theme) {
         Scaffold(
-            topBar = {}, // TODO: CURRENT SCREEN TITLE
             bottomBar = { BottomNavigationBar(navController) }
         ) {
             MainNavigationHost(navController = navController)

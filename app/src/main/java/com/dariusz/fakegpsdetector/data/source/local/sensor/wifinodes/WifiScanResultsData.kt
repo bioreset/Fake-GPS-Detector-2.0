@@ -15,9 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.shareIn
-import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
-import kotlin.coroutines.resume
 
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
@@ -27,33 +25,8 @@ constructor(
     private val context: Context
 ) {
 
-    suspend fun getCurrentScanResultsOnce() =
-        performSensorCall("get-current-scan-results-once", context.getCurrentScanResults())
-
     suspend fun getCurrentScanResultsLive() =
         performSensorCall("get-current-scan-results-live", context.getCurrentScanResultsAsFlow())
-
-    private suspend fun Context.getCurrentScanResults(): List<ScanResult> {
-        val wifiManager =
-            getSystemService(Context.WIFI_SERVICE) as? WifiManager ?: return listOf()
-        return suspendCancellableCoroutine { continuation ->
-            val wifiScanReceiver = object : BroadcastReceiver() {
-                override fun onReceive(c: Context, intent: Intent) {
-                    if (intent.action == WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) {
-                        unregisterReceiver(this)
-                        continuation.resume(wifiManager.scanResults)
-                    }
-                }
-            }
-            registerReceiver(
-                wifiScanReceiver,
-                IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
-            )
-            continuation.invokeOnCancellation {
-                unregisterReceiver(wifiScanReceiver)
-            }
-        }
-    }
 
     private suspend fun Context.getCurrentScanResultsAsFlow(): Flow<List<ScanResult>> {
         val wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager

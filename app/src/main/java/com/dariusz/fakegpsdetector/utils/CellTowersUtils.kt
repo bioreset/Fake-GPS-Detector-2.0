@@ -65,4 +65,5 @@ object CellTowersUtils {
             signalStrength = cltwm.cellSignalStrength.dbm
         )
     }
+
 }

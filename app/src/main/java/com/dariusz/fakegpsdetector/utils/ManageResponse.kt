@@ -1,7 +1,6 @@
 package com.dariusz.fakegpsdetector.utils
 
 import com.dariusz.fakegpsdetector.model.*
-import com.dariusz.fakegpsdetector.utils.RepositoryUtils.performCacheCall
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -11,20 +10,10 @@ object ManageResponse {
 
     private val moshi: Moshi = Moshi.Builder().build()
 
-    suspend fun manageResponse(
-        response: String,
-        operation: String = "manage-response",
-        cacheCall: suspend (ApiResponseModelJson) -> Unit
+    fun manageResponse(
+        response: String
     ) =
-        performCacheCall(operation,
-            response.let { apiResponse ->
-                parseResponse(apiResponse).let { parsedResponse ->
-                    cacheCall.invoke(
-                        parsedResponse
-                    )
-                }
-            }
-        )
+        parseResponse(response)
 
     fun buildJSONRequest(
         cellData: List<CellTowerModel>?,
@@ -35,18 +24,18 @@ object ManageResponse {
         return adapter.toJson(apiRequest)
     }
 
-    private fun parseResponse(response: String): ApiResponseModelJson {
+    private fun parseResponse(response: String): ApiResponseModelJson? {
         val adapter: JsonAdapter<ApiResponseModelJson> =
             moshi.adapter(ApiResponseModelJson::class.java)
-        return adapter.fromJson(response) ?: ApiResponseModelJson(LocationData(0.0, 0.0), 0)
+        return adapter.fromJson(response)
     }
 
-    fun asResponseToDb(response: ApiResponseModelJson): ApiResponseModel {
+    fun asResponseToDb(response: ApiResponseModelJson?): ApiResponseModel {
         return ApiResponseModel(
             status = "location",
-            lat = response.location.lat,
-            lng = response.location.lng,
-            accuracy = response.accuracy
+            lat = response?.location?.lat,
+            lng = response?.location?.lng,
+            accuracy = response?.accuracy
         )
     }
 }

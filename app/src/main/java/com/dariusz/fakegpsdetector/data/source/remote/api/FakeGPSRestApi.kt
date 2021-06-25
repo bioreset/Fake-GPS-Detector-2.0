@@ -14,7 +14,7 @@ interface FakeGPSRestApi {
     @Headers(API_HEADER)
     @POST(API_POST)
     suspend fun checkLocation(
-        @Body params: String,
+        @Body body: String,
         @Query("key") key: String
     ): String
 }

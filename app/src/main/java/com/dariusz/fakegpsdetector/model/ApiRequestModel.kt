@@ -9,5 +9,4 @@ data class ApiRequestModel(
     val routersList: List<RoutersListModel>?,
     @field:Json(name = "cellTowers")
     val cellTowersList: List<CellTowerModel>?
-
 )

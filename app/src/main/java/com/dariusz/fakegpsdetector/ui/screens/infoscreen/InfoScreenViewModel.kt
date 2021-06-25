@@ -15,12 +15,16 @@ import com.dariusz.fakegpsdetector.model.LocationModel
 import com.dariusz.fakegpsdetector.model.RoutersListModel
 import com.dariusz.fakegpsdetector.model.RoutersListModel.Companion.newRoutersList
 import com.dariusz.fakegpsdetector.utils.CellTowersUtils.mapCellTowers
-import com.dariusz.fakegpsdetector.utils.Injectors
+import com.dariusz.fakegpsdetector.utils.Injectors.getLocationFromApiResponseRepository
+import com.dariusz.fakegpsdetector.utils.ManageResponse
+import com.dariusz.fakegpsdetector.utils.ManageResponse.asResponseToDb
+import com.dariusz.fakegpsdetector.utils.ManageResponse.manageResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -46,45 +50,53 @@ constructor() : ViewModel() {
 
     fun initScreenTasks(context: Context) {
         getLocationDataOnce(context)
-        getCellTowersDataOnce(context)
-        getWifiNodesDataOnce(context)
+        getCellTowersData(context)
+        getWifiNodesData(context)
     }
-
-    fun getLocationFromApisResponse(context: Context) = viewModelScope.launch {
-        _apiResponse.value = getLocationFromApiResponseRepositoryLink(context).checkLocationStatus()
-    }
-
-    fun manageTheResponse(
-        context: Context,
-        cells: List<CellTowerModel>,
-        wifis: List<RoutersListModel>
-    ) =
-        viewModelScope.launch {
-            getLocationFromApiResponseRepositoryLink(context).manageResponseAfterAction(
-                cells,
-                wifis,
-                context
-            )
-        }
 
     private fun getLocationDataOnce(context: Context) = viewModelScope.launch {
         _currentLocation.value = provideLocationData(context).getCurrentLocationOnce()
     }
 
-    private fun getCellTowersDataOnce(context: Context) = viewModelScope.launch {
-        val provideData = provideCellTowersData(context)
-        val cellInfoList = provideData.getCurrentCellTowersOnce()
-        _currentCellTowers.value = mapCellTowers(cellInfoList)
+    private fun getCellTowersData(context: Context) = viewModelScope.launch {
+        provideCellTowersData(context)
+            .getCurrentCellTowersLive()
+            .collect { cellTowers ->
+                _currentCellTowers.value = mapCellTowers(cellTowers)
+            }
     }
 
-    private fun getWifiNodesDataOnce(context: Context) = viewModelScope.launch {
-        val provideData = provideWifiScanResults(context)
-        val scanResultList = provideData.getCurrentScanResultsOnce()
-        _currentRouters.value = newRoutersList(scanResultList)
+    private fun getWifiNodesData(context: Context) = viewModelScope.launch {
+        provideWifiScanResults(context)
+            .getCurrentScanResultsLive()
+            .collect { wifiNodes ->
+                _currentRouters.value = newRoutersList(wifiNodes)
+            }
     }
 
-    private fun getLocationFromApiResponseRepositoryLink(context: Context): LocationFromApiResponseRepository {
-        return Injectors.getLocationFromApiResponseRepository(context)
+    @InternalCoroutinesApi
+    fun submitRequest(
+        context: Context,
+        cellTowers: List<CellTowerModel>,
+        wifiNodes: List<RoutersListModel>
+    ) = viewModelScope.launch {
+        _apiResponse.value = asResponseToDb(
+            manageResponse(
+                getLocationFromApiResponseRepositoryLink()
+                    .checkCurrentLocationOfTheDevice(prepareRequest(cellTowers, wifiNodes), context)
+            )
+        )
+    }
+
+    @InternalCoroutinesApi
+    private fun prepareRequest(
+        cellTowers: List<CellTowerModel>,
+        wifiNodes: List<RoutersListModel>
+    ) = ManageResponse.buildJSONRequest(cellTowers, wifiNodes)
+
+    @InternalCoroutinesApi
+    private fun getLocationFromApiResponseRepositoryLink(): LocationFromApiResponseRepository {
+        return getLocationFromApiResponseRepository()
     }
 
 }

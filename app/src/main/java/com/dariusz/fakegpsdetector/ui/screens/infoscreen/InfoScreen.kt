@@ -4,18 +4,16 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.material.Button
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dariusz.fakegpsdetector.ui.MainViewModel
-import com.dariusz.fakegpsdetector.ui.components.common.BaseCard
-import com.dariusz.fakegpsdetector.ui.components.navigation.Screens
+import androidx.compose.ui.unit.dp
+import com.dariusz.fakegpsdetector.ui.components.common.BaseDetail
 import com.dariusz.fakegpsdetector.utils.DistanceCalculator.calculateDistance
 import com.dariusz.fakegpsdetector.utils.DistanceCalculator.isRealLocation
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,15 +24,11 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @InternalCoroutinesApi
 @Composable
 fun InfoScreen(viewModel: InfoScreenViewModel = InfoScreenViewModel()) {
-    val viewModelForNavigation: MainViewModel = viewModel()
-    viewModelForNavigation.setCurrentScreen(Screens.AppScreens.InfoScreen)
     val currentContext = LocalContext.current
     viewModel.initScreenTasks(currentContext)
     val currentLocation by remember(viewModel) { viewModel.currentLocation }.collectAsState()
     val currentWifiRouters by remember(viewModel) { viewModel.currentRouters }.collectAsState()
     val currentCellTowers by remember(viewModel) { viewModel.currentCellTowers }.collectAsState()
-    viewModel.manageTheResponse(currentContext, currentCellTowers, currentWifiRouters)
-    viewModel.getLocationFromApisResponse(currentContext)
     val apiResponse by remember(viewModel) { viewModel.apiResponse }.collectAsState()
     val calculator = calculateDistance(
         currentLocation.latitude,
@@ -51,17 +45,25 @@ fun InfoScreen(viewModel: InfoScreenViewModel = InfoScreenViewModel()) {
         modifier = Modifier
             .fillMaxSize()
             .wrapContentSize(Alignment.Center)
+            .padding(start = 6.dp)
     ) {
-        BaseCard(
+        BaseDetail(
             "Current Location: ",
-            "lat: ${currentLocation.latitude}, lng: ${currentLocation.longitude}"
+            "lat: ${currentLocation.latitude}, lng: ${currentLocation.longitude}",
+
         )
-        BaseCard(
+        BaseDetail(
             "Current Location From API: ",
             "lat: ${apiResponse.lat}, lng: ${apiResponse.lng}, accuracy: ${apiResponse.accuracy} "
         )
-        BaseCard("Verdict: ", verdict)
+        BaseDetail("Verdict: ", verdict)
+        Button(
+            onClick = {
+                viewModel.submitRequest(currentContext, currentCellTowers, currentWifiRouters)
+            },
+            modifier = Modifier.padding(top = 10.dp)
+        ) {
+            Text("Submit")
+        }
     }
 }
-
-
