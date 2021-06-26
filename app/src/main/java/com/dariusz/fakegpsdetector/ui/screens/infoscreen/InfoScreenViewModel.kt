@@ -6,19 +6,15 @@ import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dariusz.fakegpsdetector.data.repository.LocationFromApiResponseRepository
+import com.dariusz.fakegpsdetector.di.NewDataSourceModule
 import com.dariusz.fakegpsdetector.di.NewDataSourceModule.provideCellTowersData
+import com.dariusz.fakegpsdetector.di.NewDataSourceModule.provideCellTowersDataApi29Plus
 import com.dariusz.fakegpsdetector.di.NewDataSourceModule.provideLocationData
 import com.dariusz.fakegpsdetector.di.NewDataSourceModule.provideWifiScanResults
-import com.dariusz.fakegpsdetector.model.ApiResponseModel
-import com.dariusz.fakegpsdetector.model.CellTowerModel
-import com.dariusz.fakegpsdetector.model.LocationModel
-import com.dariusz.fakegpsdetector.model.RoutersListModel
+import com.dariusz.fakegpsdetector.model.*
 import com.dariusz.fakegpsdetector.model.RoutersListModel.Companion.newRoutersList
 import com.dariusz.fakegpsdetector.utils.CellTowersUtils.mapCellTowers
 import com.dariusz.fakegpsdetector.utils.Injectors.getLocationFromApiResponseRepository
-import com.dariusz.fakegpsdetector.utils.ManageResponse
-import com.dariusz.fakegpsdetector.utils.ManageResponse.asResponseToDb
-import com.dariusz.fakegpsdetector.utils.ManageResponse.manageResponse
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -45,12 +41,11 @@ constructor() : ViewModel() {
     private var _currentCellTowers = MutableStateFlow(listOf<CellTowerModel>())
     val currentCellTowers: StateFlow<List<CellTowerModel>> = _currentCellTowers
 
-    private var _apiResponse = MutableStateFlow(ApiResponseModel(null, null, null, null))
+    private var _apiResponse = MutableStateFlow(ApiResponseModel(LocationData(null, null), null))
     val apiResponse: StateFlow<ApiResponseModel> = _apiResponse
 
     fun initScreenTasks(context: Context) {
         getLocationDataOnce(context)
-        getCellTowersData(context)
         getWifiNodesData(context)
     }
 
@@ -58,13 +53,23 @@ constructor() : ViewModel() {
         _currentLocation.value = provideLocationData(context).getCurrentLocationOnce()
     }
 
-    private fun getCellTowersData(context: Context) = viewModelScope.launch {
+    fun getCellTowersData(context: Context) = viewModelScope.launch {
         provideCellTowersData(context)
             .getCurrentCellTowersLive()
             .collect { cellTowers ->
                 _currentCellTowers.value = mapCellTowers(cellTowers)
             }
     }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun getCellTowersDataLiveApi29Plus(context: Context) =
+        viewModelScope.launch {
+            provideCellTowersDataApi29Plus(context)
+                .getCurrentCellTowersLive()
+                .collect { cellTowers ->
+                    _currentCellTowers.value = mapCellTowers(cellTowers)
+            }
+        }
 
     private fun getWifiNodesData(context: Context) = viewModelScope.launch {
         provideWifiScanResults(context)
@@ -74,25 +79,19 @@ constructor() : ViewModel() {
             }
     }
 
+
     @InternalCoroutinesApi
     fun submitRequest(
         context: Context,
         cellTowers: List<CellTowerModel>,
         wifiNodes: List<RoutersListModel>
     ) = viewModelScope.launch {
-        _apiResponse.value = asResponseToDb(
-            manageResponse(
-                getLocationFromApiResponseRepositoryLink()
-                    .checkCurrentLocationOfTheDevice(prepareRequest(cellTowers, wifiNodes), context)
-            )
-        )
+        _apiResponse.value = getLocationFromApiResponseRepositoryLink()
+                    .checkCurrentLocationOfTheDevice(
+                        ApiRequestModel(wifiNodes, cellTowers),
+                        context
+                    )
     }
-
-    @InternalCoroutinesApi
-    private fun prepareRequest(
-        cellTowers: List<CellTowerModel>,
-        wifiNodes: List<RoutersListModel>
-    ) = ManageResponse.buildJSONRequest(cellTowers, wifiNodes)
 
     @InternalCoroutinesApi
     private fun getLocationFromApiResponseRepositoryLink(): LocationFromApiResponseRepository {

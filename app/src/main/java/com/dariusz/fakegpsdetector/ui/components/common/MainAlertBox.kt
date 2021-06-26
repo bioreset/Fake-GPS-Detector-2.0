@@ -21,10 +21,7 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @Composable
 fun MainAlertBox(viewModel: MainViewModel = MainViewModel()) {
     val currentContext = LocalContext.current
-    val currentCoroutineScope = rememberCoroutineScope()
-    LaunchedEffect(currentCoroutineScope) {
-        viewModel.initViewModel(currentContext)
-    }
+    viewModel.initViewModel(currentContext)
     val currentGPSStatus by remember(viewModel) { viewModel.gpsStatus }.collectAsState()
     val currentWifiStatus by remember(viewModel) { viewModel.wifiStatus }.collectAsState()
     val currentPermissionsStatus by remember(viewModel) { viewModel.permissionsStatus }.collectAsState()

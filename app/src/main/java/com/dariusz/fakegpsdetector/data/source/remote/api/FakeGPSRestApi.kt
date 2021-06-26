@@ -1,5 +1,6 @@
 package com.dariusz.fakegpsdetector.data.source.remote.api
 
+import com.dariusz.fakegpsdetector.model.ApiResponseModel
 import com.dariusz.fakegpsdetector.utils.Constants.API_HEADER
 import com.dariusz.fakegpsdetector.utils.Constants.API_POST
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -16,5 +17,5 @@ interface FakeGPSRestApi {
     suspend fun checkLocation(
         @Body body: String,
         @Query("key") key: String
-    ): String
+    ): ApiResponseModel
 }

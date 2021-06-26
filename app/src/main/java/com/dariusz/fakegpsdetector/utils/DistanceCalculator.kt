@@ -1,43 +1,39 @@
 package com.dariusz.fakegpsdetector.utils
 
 import android.location.Location
+import com.dariusz.fakegpsdetector.model.LocationData
+import com.dariusz.fakegpsdetector.model.LocationModel
 import kotlin.math.roundToInt
 
-object DistanceCalculator {
+class DistanceCalculator(
+    private val locationOne: LocationModel,
+    private val locationTwo: LocationData
+) {
 
-    private var location1: Location = Location("one")
-    private var location2: Location = Location("two")
+    private var locationNumberOne: Location = Location("one")
+    private var locationNumberTwo: Location = Location("two")
 
-    private var result: Boolean = false
-
-    fun calculateDistance(
-        location1lat: Double,
-        location1lng: Double,
-        location2lat: Double,
-        location2lng: Double
-    ): Int {
-        location1.latitude = location1lat
-        location1.longitude = location1lng
-
-        location2.latitude = location2lat
-        location2.longitude = location2lng
-
-        val distance = location1.distanceTo(location2)
-        return distance.roundToInt()
+    private fun mapLocations() {
+        locationNumberOne.latitude = locationOne.latitude ?: 0.0
+        locationNumberOne.longitude = locationOne.longitude ?: 0.0
+        locationNumberTwo.latitude = locationTwo.lat ?: 0.0
+        locationNumberTwo.longitude = locationTwo.lng ?: 0.0
     }
 
-    fun isRealLocation(distance: Int, accuracy: Int): Boolean {
-        result = when {
-            distance < 2 * accuracy -> {
+    fun calculateDistance() = locationNumberOne.distanceTo(locationNumberTwo).roundToInt()
+
+    fun isRealLocation(accuracy: Int): Boolean {
+        mapLocations()
+        return when {
+            calculateDistance() < 2 * accuracy -> {
                 true
             }
-            distance == accuracy -> {
+            calculateDistance() == accuracy -> {
                 true
             }
             else -> {
                 false
             }
         }
-        return result
     }
 }
