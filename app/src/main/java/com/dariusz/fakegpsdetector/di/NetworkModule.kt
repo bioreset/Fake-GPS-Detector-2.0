@@ -1,8 +1,8 @@
 package com.dariusz.fakegpsdetector.di
 
-import com.dariusz.fakegpsdetector.data.source.remote.api.FakeGPSRestApi
-import com.dariusz.fakegpsdetector.data.source.remote.api.FakeGPSRestApiService
-import com.dariusz.fakegpsdetector.data.source.remote.api.FakeGPSRestApiServiceImpl
+import com.dariusz.fakegpsdetector.data.remote.api.FakeGPSRestApi
+import com.dariusz.fakegpsdetector.data.remote.api.FakeGPSRestApiService
+import com.dariusz.fakegpsdetector.data.remote.api.FakeGPSRestApiServiceImpl
 import com.dariusz.fakegpsdetector.utils.Constants.API_URL
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory

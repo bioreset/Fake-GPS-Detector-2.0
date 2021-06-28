@@ -1,6 +1,6 @@
 package com.dariusz.fakegpsdetector.utils.sensor
 
-import com.dariusz.fakegpsdetector.model.ErrorContent
+import com.dariusz.fakegpsdetector.domain.model.ErrorContent
 
 sealed class SensorStatus<out T> {
 

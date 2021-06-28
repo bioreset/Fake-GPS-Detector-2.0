@@ -1,6 +1,6 @@
 package com.dariusz.fakegpsdetector.utils.api
 
-import com.dariusz.fakegpsdetector.model.ErrorContent
+import com.dariusz.fakegpsdetector.domain.model.ErrorContent
 
 sealed class APIStatus<out T> {
 

@@ -10,6 +10,7 @@ This application allows for validation of the current location of an Android dev
 - Verify device's location
 
 ## Technologies, methodologies and libraries used
+- Clean Architecture
 - MVVM pattern with Repositories
 - Geolocation API
 - Google Maps API

@@ -1,8 +1,8 @@
 package com.dariusz.fakegpsdetector.utils
 
 import android.location.Location
-import com.dariusz.fakegpsdetector.model.LocationData
-import com.dariusz.fakegpsdetector.model.LocationModel
+import com.dariusz.fakegpsdetector.domain.model.LocationData
+import com.dariusz.fakegpsdetector.domain.model.LocationModel
 import kotlin.math.roundToInt
 
 class DistanceCalculator(

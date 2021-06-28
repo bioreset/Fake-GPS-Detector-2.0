@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.telephony.*
 import androidx.annotation.RequiresApi
-import com.dariusz.fakegpsdetector.model.CellTowerModel
+import com.dariusz.fakegpsdetector.domain.model.CellTowerModel
 
 object CellTowersUtils {
 

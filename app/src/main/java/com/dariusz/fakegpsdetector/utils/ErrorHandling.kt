@@ -1,7 +1,7 @@
 package com.dariusz.fakegpsdetector.utils
 
 import android.util.Log
-import com.dariusz.fakegpsdetector.model.ErrorContent
+import com.dariusz.fakegpsdetector.domain.model.ErrorContent
 
 object ErrorHandling {
 
