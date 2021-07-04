@@ -2,8 +2,12 @@ package com.dariusz.fakegpsdetector.presentation.screens.celltowerscreen
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dariusz.fakegpsdetector.presentation.components.common.CardCellTowers
 import com.dariusz.fakegpsdetector.utils.CellTowersUtils.mapCellTowers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -13,13 +17,13 @@ import kotlinx.coroutines.InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @Composable
-fun CellTowerScreen(viewModel: CellTowerScreenViewModel = CellTowerScreenViewModel()) {
+fun CellTowerScreen(cellTowerScreenViewModel: CellTowerScreenViewModel = viewModel()) {
     val currentContext = LocalContext.current
     if (Build.VERSION.SDK_INT < 29) {
-        viewModel.getCellTowersDataLive(currentContext)
+        cellTowerScreenViewModel.getCellTowersDataLive(currentContext)
     } else {
-        viewModel.getCellTowersDataLiveApi29Plus(currentContext)
+        cellTowerScreenViewModel.getCellTowersDataLiveApi29Plus(currentContext)
     }
-    val cellTowersState by remember(viewModel) { viewModel.cellTowers }.collectAsState()
+    val cellTowersState by remember(cellTowerScreenViewModel) { cellTowerScreenViewModel.cellTowers }.collectAsState()
     CardCellTowers(mapCellTowers(cellTowersState))
 }

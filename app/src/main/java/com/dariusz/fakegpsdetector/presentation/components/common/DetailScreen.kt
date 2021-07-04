@@ -48,7 +48,9 @@ fun CellTowerDetailBox(cellInfoData: CellTowerModel) {
 fun WifiNodeDetailBox(wifiNodeData: RoutersListModel) {
     val openDialog = remember { mutableStateOf(true) }
     if (openDialog.value) {
-        Box {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()

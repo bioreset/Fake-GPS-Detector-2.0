@@ -15,14 +15,20 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.shareIn
 import javax.inject.Inject
 
+interface WifiStatusData {
+
+    val currentWifiStatus: Flow<WifiStatusModel>
+
+}
+
 @ExperimentalCoroutinesApi
-class WifiStatusData
+class WifiStatusDataImpl
 @Inject
 constructor(
-    private val context: Context
-) {
+    context: Context
+) : WifiStatusData {
 
-    fun getLiveWifiStatus() = context.liveWifiStatus()
+    override val currentWifiStatus: Flow<WifiStatusModel> = context.liveWifiStatus()
 
     private fun Context.liveWifiStatus(): Flow<WifiStatusModel> {
         val wifiManager = getSystemService(Context.WIFI_SERVICE) as? WifiManager

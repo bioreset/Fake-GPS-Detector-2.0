@@ -1,6 +1,5 @@
 package com.dariusz.fakegpsdetector.domain.repository
 
-import android.content.Context
 import com.dariusz.fakegpsdetector.data.remote.api.FakeGPSRestApiService
 import com.dariusz.fakegpsdetector.domain.model.ApiRequestModel
 import com.dariusz.fakegpsdetector.domain.model.ApiResponseModel
@@ -14,9 +13,11 @@ class LocationFromApiResponseRepository
 constructor(
     private val fakeGPSRestApiService: FakeGPSRestApiService
 ) {
-    suspend fun checkCurrentLocationOfTheDevice(body: ApiRequestModel, context: Context): ApiResponseModel =
+    suspend fun checkCurrentLocationOfTheDevice(
+        body: ApiRequestModel
+    ): ApiResponseModel =
         performApiCall(
             "check-current-location-api-call",
-            fakeGPSRestApiService.checkCurrentLocation(body, context)
+            fakeGPSRestApiService.checkCurrentLocation(body)
         )
 }

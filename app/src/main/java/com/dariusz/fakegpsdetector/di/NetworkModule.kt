@@ -9,7 +9,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ViewComponent
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.InternalCoroutinesApi
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -20,7 +20,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 
 @InternalCoroutinesApi
 @Module
-@InstallIn(ViewComponent::class)
+@InstallIn(SingletonComponent::class)
 object NetworkModule {
 
     private val logging: Interceptor = HttpLoggingInterceptor().apply {

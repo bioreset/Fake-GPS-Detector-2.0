@@ -10,22 +10,25 @@ import android.telephony.TelephonyManager
 import com.dariusz.fakegpsdetector.utils.RepositoryUtils.performSensorCall
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.shareIn
 import javax.inject.Inject
+
+interface CellTowersData {
+
+    suspend fun getCurrentCellTowersLive(): Flow<List<CellInfo>>
+
+}
 
 @SuppressLint("MissingPermission")
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
-class CellTowersData
+class CellTowersDataImpl
 @Inject
-constructor(private val context: Context) {
+constructor(private val context: Context) : CellTowersData {
 
-    suspend fun getCurrentCellTowersLive() =
+    override suspend fun getCurrentCellTowersLive(): Flow<List<CellInfo>> =
         performSensorCall("get-current-cell-towers-live", context.getCurrentCellTowersAsFlow())
 
     private suspend fun Context.getCurrentCellTowersAsFlow(): Flow<List<CellInfo>> {
@@ -46,9 +49,6 @@ constructor(private val context: Context) {
             awaitClose {
                 unregisterReceiver(cellTowersScanReceiver)
             }
-        }.shareIn(
-            MainScope(),
-            SharingStarted.WhileSubscribed()
-        )
+        }
     }
 }

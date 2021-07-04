@@ -1,8 +1,6 @@
 package com.dariusz.fakegpsdetector.utils
 
 import android.Manifest
-import android.content.Context
-import com.dariusz.fakegpsdetector.R
 import kotlinx.coroutines.Dispatchers
 
 object Constants {
@@ -11,7 +9,7 @@ object Constants {
     const val API_URL = "https://www.googleapis.com/"
     const val API_HEADER = "Content-Type: application/json"
     const val API_POST = "geolocation/v1/geolocate"
-    fun getApiKey(context: Context) = context.getString(R.string.google_maps_api_key)
+    const val API_KEY = ""
 
     // PERMISSION SETUP
     val permissionToWatch = listOf(

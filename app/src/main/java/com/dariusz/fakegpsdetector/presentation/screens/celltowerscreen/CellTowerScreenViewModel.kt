@@ -6,14 +6,12 @@ import android.telephony.CellInfo
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dariusz.fakegpsdetector.di.NewDataSourceModule.provideCellTowersData
-import com.dariusz.fakegpsdetector.di.NewDataSourceModule.provideCellTowersDataApi29Plus
+import com.dariusz.fakegpsdetector.di.DataSourceModule.provideCellTowersData
+import com.dariusz.fakegpsdetector.di.DataSourceModule.provideCellTowersDataApi29Plus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,6 +24,7 @@ constructor() : ViewModel() {
 
     private var _cellTowers = MutableStateFlow(listOf<CellInfo>())
     val cellTowers: StateFlow<List<CellInfo>> = _cellTowers
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
 
     @RequiresApi(Build.VERSION_CODES.P)
     fun getCellTowersDataLive(context: Context) =

@@ -14,13 +14,13 @@ class DistanceCalculator(
     private var locationNumberTwo: Location = Location("two")
 
     private fun mapLocations() {
-        locationNumberOne.latitude = locationOne.latitude ?: 0.0
-        locationNumberOne.longitude = locationOne.longitude ?: 0.0
+        locationNumberOne.latitude = locationOne.latitude
+        locationNumberOne.longitude = locationOne.longitude
         locationNumberTwo.latitude = locationTwo.lat ?: 0.0
         locationNumberTwo.longitude = locationTwo.lng ?: 0.0
     }
 
-    fun calculateDistance() = locationNumberOne.distanceTo(locationNumberTwo).roundToInt()
+    private fun calculateDistance() = locationNumberOne.distanceTo(locationNumberTwo).roundToInt()
 
     fun isRealLocation(accuracy: Int): Boolean {
         mapLocations()

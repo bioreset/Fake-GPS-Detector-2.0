@@ -5,21 +5,18 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dariusz.fakegpsdetector.domain.repository.LocationFromApiResponseRepository
-import com.dariusz.fakegpsdetector.di.NewDataSourceModule.provideCellTowersData
-import com.dariusz.fakegpsdetector.di.NewDataSourceModule.provideCellTowersDataApi29Plus
-import com.dariusz.fakegpsdetector.di.NewDataSourceModule.provideLocationData
-import com.dariusz.fakegpsdetector.di.NewDataSourceModule.provideWifiScanResults
+import com.dariusz.fakegpsdetector.di.DataSourceModule.provideCellTowersData
+import com.dariusz.fakegpsdetector.di.DataSourceModule.provideCellTowersDataApi29Plus
+import com.dariusz.fakegpsdetector.di.DataSourceModule.provideLocationData
+import com.dariusz.fakegpsdetector.di.DataSourceModule.provideWifiScanResults
 import com.dariusz.fakegpsdetector.domain.model.*
 import com.dariusz.fakegpsdetector.domain.model.RoutersListModel.Companion.newRoutersList
+import com.dariusz.fakegpsdetector.domain.repository.LocationFromApiResponseRepository
 import com.dariusz.fakegpsdetector.utils.CellTowersUtils.mapCellTowers
-import com.dariusz.fakegpsdetector.utils.Injectors.getLocationFromApiResponseRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,19 +26,21 @@ import javax.inject.Inject
 @HiltViewModel
 class InfoScreenViewModel
 @Inject
-constructor() : ViewModel() {
+constructor(
+    private val locationFromApiResponseRepository: LocationFromApiResponseRepository
+) : ViewModel() {
 
     private var _currentLocation = MutableStateFlow(LocationModel(0.0, 0.0))
     val currentLocation: StateFlow<LocationModel> = _currentLocation
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), LocationModel(0.0, 0.0))
 
     private var _currentRouters = MutableStateFlow(listOf<RoutersListModel>())
     val currentRouters: StateFlow<List<RoutersListModel>> = _currentRouters
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
 
     private var _currentCellTowers = MutableStateFlow(listOf<CellTowerModel>())
     val currentCellTowers: StateFlow<List<CellTowerModel>> = _currentCellTowers
-
-    private var _apiResponse = MutableStateFlow(ApiResponseModel(LocationData(null, null), null))
-    val apiResponse: StateFlow<ApiResponseModel> = _apiResponse
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
 
     fun initScreenTasks(context: Context) {
         getLocationDataOnce(context)
@@ -67,7 +66,7 @@ constructor() : ViewModel() {
                 .getCurrentCellTowersLive()
                 .collect { cellTowers ->
                     _currentCellTowers.value = mapCellTowers(cellTowers)
-            }
+                }
         }
 
     private fun getWifiNodesData(context: Context) = viewModelScope.launch {
@@ -79,22 +78,26 @@ constructor() : ViewModel() {
     }
 
 
+    private var _apiResponse = MutableSharedFlow<ApiResponseModel>(replay = 1)
+    val apiResponse: SharedFlow<ApiResponseModel> = _apiResponse
+        .shareIn(
+            viewModelScope,
+            SharingStarted.Eagerly,
+            1
+        )
+
+
     @InternalCoroutinesApi
     fun submitRequest(
-        context: Context,
         cellTowers: List<CellTowerModel>,
         wifiNodes: List<RoutersListModel>
     ) = viewModelScope.launch {
-        _apiResponse.value = getLocationFromApiResponseRepositoryLink()
-                    .checkCurrentLocationOfTheDevice(
-                        ApiRequestModel(wifiNodes, cellTowers),
-                        context
-                    )
-    }
+        _apiResponse.emit(
+            locationFromApiResponseRepository
+                .checkCurrentLocationOfTheDevice(
+                    ApiRequestModel(wifiNodes, cellTowers)
+                )
+        )
 
-    @InternalCoroutinesApi
-    private fun getLocationFromApiResponseRepositoryLink(): LocationFromApiResponseRepository {
-        return getLocationFromApiResponseRepository()
     }
-
 }

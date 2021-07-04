@@ -7,22 +7,25 @@ import android.content.IntentFilter
 import android.location.LocationManager
 import com.dariusz.fakegpsdetector.domain.model.GpsStatusModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.shareIn
 import javax.inject.Inject
 
+interface GpsStatusData {
+
+    val currentGpsStatus: Flow<GpsStatusModel>
+
+}
+
 @ExperimentalCoroutinesApi
-class GpsStatusData
+class GpsStatusDataImpl
 @Inject
 constructor(
-    private val context: Context
-) {
+    context: Context
+) : GpsStatusData {
 
-    fun getLiveGPSStatus() = context.liveGpsStatus()
+    override val currentGpsStatus: Flow<GpsStatusModel> = context.liveGpsStatus()
 
     private fun Context.liveGpsStatus(): Flow<GpsStatusModel> {
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -43,10 +46,7 @@ constructor(
             awaitClose {
                 unregisterReceiver(gpsSwitchStateReceiver)
             }
-        }.shareIn(
-            MainScope(),
-            SharingStarted.WhileSubscribed()
-        )
+        }
     }
 
     private fun checkGpsStatus(locationManager: LocationManager) = isGpsEnabled(

@@ -17,15 +17,21 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.shareIn
 import javax.inject.Inject
 
+interface WifiScanResultsData {
+
+    suspend fun getCurrentScanResultsLive(): Flow<List<ScanResult>>
+
+}
+
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
-class WifiScanResultsData
+class WifiScanResultsDataImpl
 @Inject
 constructor(
     private val context: Context
-) {
+) : WifiScanResultsData {
 
-    suspend fun getCurrentScanResultsLive() =
+    override suspend fun getCurrentScanResultsLive(): Flow<List<ScanResult>> =
         performSensorCall("get-current-scan-results-live", context.getCurrentScanResultsAsFlow())
 
     private suspend fun Context.getCurrentScanResultsAsFlow(): Flow<List<ScanResult>> {

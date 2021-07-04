@@ -11,13 +11,19 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.shareIn
 import javax.inject.Inject
 
-class PermissionsStatusData
+interface PermissionsStatusData {
+
+    fun getLivePermissionStatus(permissionsToListen: List<String>): Flow<PermissionStatusModel>
+
+}
+
+class PermissionsStatusDataImpl
 @Inject
 constructor(
     private val context: Context
-) {
+) : PermissionsStatusData {
 
-    fun getLivePermissionStatus(permissionsToListen: List<String>) =
+    override fun getLivePermissionStatus(permissionsToListen: List<String>): Flow<PermissionStatusModel> =
         context.livePermissionsStatus(permissionsToListen)
 
     private fun Context.livePermissionsStatus(permissionsToListen: List<String>): Flow<PermissionStatusModel> {

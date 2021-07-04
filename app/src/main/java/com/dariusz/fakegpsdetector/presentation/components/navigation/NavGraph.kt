@@ -8,10 +8,12 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.dariusz.fakegpsdetector.di.RepositoryModule.getLocationFromApiResponseRepository
 import com.dariusz.fakegpsdetector.presentation.screens.celltowerscreen.CellTowerScreen
 import com.dariusz.fakegpsdetector.presentation.screens.celltowerscreen.CellTowerScreenViewModel
 import com.dariusz.fakegpsdetector.presentation.screens.infoscreen.InfoScreen
 import com.dariusz.fakegpsdetector.presentation.screens.infoscreen.InfoScreenViewModel
+import com.dariusz.fakegpsdetector.presentation.screens.infoscreen.InfoScreenViewModelFactory
 import com.dariusz.fakegpsdetector.presentation.screens.mapscreen.MapScreen
 import com.dariusz.fakegpsdetector.presentation.screens.mapscreen.MapScreenViewModel
 import com.dariusz.fakegpsdetector.presentation.screens.routerscreen.RouterScreen
@@ -41,7 +43,11 @@ fun MainNavigationHost(navController: NavController) {
             CellTowerScreen(viewModel)
         }
         composable(Screens.AppScreens.InfoScreen.route) {
-            val viewModel: InfoScreenViewModel = viewModel()
+            val viewModel: InfoScreenViewModel = viewModel(
+                factory = InfoScreenViewModelFactory(
+                    getLocationFromApiResponseRepository()
+                )
+            )
             InfoScreen(viewModel)
         }
     }

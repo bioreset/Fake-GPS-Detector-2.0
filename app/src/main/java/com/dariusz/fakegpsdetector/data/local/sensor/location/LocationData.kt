@@ -9,26 +9,32 @@ import com.dariusz.fakegpsdetector.utils.RepositoryUtils.performSensorCall
 import com.google.android.gms.location.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import kotlin.coroutines.resume
 
+interface LocationData {
+
+    suspend fun getCurrentLocationLive(): Flow<LocationModel>
+
+    suspend fun getCurrentLocationOnce(): LocationModel
+
+
+}
+
 @SuppressLint("MissingPermission")
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
-class LocationData
+class LocationDataImpl
 @Inject
 constructor(
     private val context: Context
-) {
+) : LocationData {
 
-    suspend fun getCurrentLocationLive(): Flow<LocationModel> {
+    override suspend fun getCurrentLocationLive(): Flow<LocationModel> {
         val fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(context)
         return performSensorCall(
@@ -37,7 +43,7 @@ constructor(
         )
     }
 
-    suspend fun getCurrentLocationOnce(): LocationModel {
+    override suspend fun getCurrentLocationOnce(): LocationModel {
         val fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(context)
         return performSensorCall(
@@ -70,10 +76,7 @@ constructor(
             awaitClose {
                 removeLocationUpdates(locationCallback)
             }
-        }.shareIn(
-            MainScope(),
-            SharingStarted.WhileSubscribed()
-        )
+        }
 
     private suspend fun FusedLocationProviderClient.getCurrentLocationOnce(): LocationModel =
         suspendCancellableCoroutine { continuation ->
@@ -92,13 +95,11 @@ constructor(
                     }
                 }
             }
-
             requestLocationUpdates(
                 locationRequest,
                 locationCallback,
                 Looper.getMainLooper()
             )
-
             continuation.invokeOnCancellation {
                 removeLocationUpdates(locationCallback)
             }

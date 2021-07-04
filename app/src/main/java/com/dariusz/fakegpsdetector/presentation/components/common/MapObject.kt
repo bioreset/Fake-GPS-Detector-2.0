@@ -45,27 +45,26 @@ private fun MapViewContainer(
         LatLng(latitude.toDouble(), longitude.toDouble())
     }
 
-    var mapInitialized by remember(map) { mutableStateOf(false) }
+    val mapInitialized = remember(map) { mutableStateOf(false) }
     LaunchedEffect(map, mapInitialized) {
-        if (!mapInitialized) {
+        if (!mapInitialized.value) {
             val googleMap = map.awaitMap()
             googleMap.addMarker { position(cameraPosition) }
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(cameraPosition))
-            mapInitialized = true
+            mapInitialized.value = true
         }
     }
 
-    var zoom by rememberSaveable(map) { mutableStateOf(InitialZoom) }
-    ZoomControls(zoom) {
-        zoom = it.coerceIn(MinZoom, MaxZoom)
+    val zoom = rememberSaveable(map) { mutableStateOf(InitialZoom) }
+    ZoomControls(zoom.value) {
+        zoom.value = it.coerceIn(MinZoom, MaxZoom)
     }
 
     val coroutineScope = rememberCoroutineScope()
     AndroidView({ map }) { mapView ->
-        val mapZoom = zoom
         coroutineScope.launch {
             val googleMap = mapView.awaitMap()
-            googleMap.setMinZoomPreference(mapZoom)
+            googleMap.setMinZoomPreference(zoom.value)
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(cameraPosition))
         }
     }
