@@ -11,23 +11,41 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.dariusz.fakegpsdetector.R
+import com.dariusz.fakegpsdetector.di.RepositoryModule.provideRequirementsRepository
 import com.dariusz.fakegpsdetector.presentation.MainViewModel
-import com.dariusz.fakegpsdetector.utils.Constants.permissionToWatch
+import com.dariusz.fakegpsdetector.utils.Constants.permissionsToWatch
+import com.dariusz.fakegpsdetector.utils.ResultUtils.ManageResultOnScreen
+import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.composeViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @Composable
-fun MainAlertBox(viewModel: MainViewModel = MainViewModel()) {
+fun MainAlertBox() {
+
     val currentContext = LocalContext.current
-    viewModel.initViewModel(currentContext)
+
+    val viewModel = composeViewModel {
+        MainViewModel(
+            provideRequirementsRepository(currentContext)
+        )
+    }
+
     val currentGPSStatus by remember(viewModel) { viewModel.gpsStatus }.collectAsState()
     val currentWifiStatus by remember(viewModel) { viewModel.wifiStatus }.collectAsState()
     val currentPermissionsStatus by remember(viewModel) { viewModel.permissionsStatus }.collectAsState()
-    if (!currentGPSStatus.status) GpsAlert(currentContext)
-    if (!currentWifiStatus.status) WifiAlert(currentContext)
-    if (!currentPermissionsStatus.status) PermissionsAlert(currentContext)
+
+    ManageResultOnScreen(currentGPSStatus) {
+        if (!it.status) GpsAlert(currentContext)
+    }
+    ManageResultOnScreen(currentWifiStatus) {
+        if (!it.status) WifiAlert(currentContext)
+    }
+    ManageResultOnScreen(currentPermissionsStatus) {
+        if (!it.status) PermissionsAlert(currentContext)
+    }
+
 }
 
 @Composable
@@ -96,7 +114,7 @@ fun PermissionsAlert(currentContext: Context) {
                     onClick = {
                         openDialog.value = false
                         launcher.launch(
-                            permissionToWatch.toTypedArray()
+                            permissionsToWatch.toTypedArray()
                         )
                     }
                 ) {

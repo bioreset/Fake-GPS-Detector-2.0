@@ -26,9 +26,8 @@ class FakeGPSRestApiServiceImpl : FakeGPSRestApiService {
             API_KEY
         )
 
-    private val moshi: Moshi = Moshi.Builder().build()
-
     private fun toJsonString(input: ApiRequestModel): String {
+        val moshi: Moshi = Moshi.Builder().build()
         val adapter: JsonAdapter<ApiRequestModel> = moshi.adapter(ApiRequestModel::class.java)
         return adapter.toJson(input)
     }

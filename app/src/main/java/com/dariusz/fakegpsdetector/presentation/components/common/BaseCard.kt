@@ -18,8 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.dariusz.fakegpsdetector.domain.model.CellTowerModel
 import com.dariusz.fakegpsdetector.domain.model.RoutersListModel
 
-private val textColumnStyle = SpanStyle(fontWeight = FontWeight.Bold)
-
 @Composable
 fun CardWifiNodes(
     listOfWifiNodes: List<RoutersListModel>
@@ -107,7 +105,7 @@ fun CardCellTowers(
 fun BaseCard(
     title: String,
     content: String,
-    style: SpanStyle = textColumnStyle
+    style: SpanStyle = SpanStyle(fontWeight = FontWeight.Bold)
 ) {
     Card {
         Column {

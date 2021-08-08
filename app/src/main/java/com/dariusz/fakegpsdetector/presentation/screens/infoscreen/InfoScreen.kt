@@ -11,14 +11,12 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dariusz.fakegpsdetector.domain.model.ApiResponseModel
-import com.dariusz.fakegpsdetector.domain.model.LocationData
-import com.dariusz.fakegpsdetector.domain.model.LocationModel
+import com.dariusz.fakegpsdetector.domain.model.*
 import com.dariusz.fakegpsdetector.presentation.components.common.BaseDetail
 import com.dariusz.fakegpsdetector.utils.DistanceCalculator
+import com.dariusz.fakegpsdetector.utils.ResultUtils.ManageResultsOnScreen
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
@@ -28,22 +26,44 @@ import kotlinx.coroutines.launch
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @Composable
-fun InfoScreen(infoScreenViewModel: InfoScreenViewModel = viewModel()) {
-    val currentContext = LocalContext.current
+fun InfoScreen(infoScreenViewModel: InfoScreenViewModel) {
+
     val currentCoroutineScope = rememberCoroutineScope()
+    val currentLocation by remember(infoScreenViewModel) { infoScreenViewModel.currentLocation }.collectAsState()
+    val currentWifiRouters by remember(infoScreenViewModel) { infoScreenViewModel.currentRouters }.collectAsState()
+    val currentCellTowers by remember(infoScreenViewModel) { infoScreenViewModel.currentCellTowers }.collectAsState()
+
+    ManageResultsOnScreen(
+        currentLocation,
+        currentWifiRouters,
+        currentCellTowers
+    ) { location, wifi, cell ->
+        if (wifi != null && cell != null) {
+            ShowData(
+                infoScreenViewModel = infoScreenViewModel,
+                currentCoroutineScope = currentCoroutineScope,
+                location = location,
+                cells = cell,
+                wifis = wifi
+            )
+        }
+    }
+}
+
+@ExperimentalCoroutinesApi
+@InternalCoroutinesApi
+@Composable
+fun ShowData(
+    infoScreenViewModel: InfoScreenViewModel,
+    currentCoroutineScope: CoroutineScope,
+    location: LocationModel,
+    cells: List<CellTowerModel>,
+    wifis: List<RoutersListModel>
+) {
     val apiRequestSent = remember { mutableStateOf(false) }
     val apiResponse = remember {
         mutableStateOf(ApiResponseModel(LocationData(0.0, 0.0), 0))
     }
-    infoScreenViewModel.initScreenTasks(currentContext)
-    if (Build.VERSION.SDK_INT < 29) {
-        infoScreenViewModel.getCellTowersData(currentContext)
-    } else {
-        infoScreenViewModel.getCellTowersDataLiveApi29Plus(currentContext)
-    }
-    val currentLocation by remember(infoScreenViewModel) { infoScreenViewModel.currentLocation }.collectAsState()
-    val currentWifiRouters by remember(infoScreenViewModel) { infoScreenViewModel.currentRouters }.collectAsState()
-    val currentCellTowers by remember(infoScreenViewModel) { infoScreenViewModel.currentCellTowers }.collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -53,12 +73,16 @@ fun InfoScreen(infoScreenViewModel: InfoScreenViewModel = viewModel()) {
         Button(
             onClick = {
                 apiRequestSent.value = true
-                infoScreenViewModel.submitRequest(currentCellTowers, currentWifiRouters)
+                infoScreenViewModel.submitRequest(cells, wifis)
+
                 currentCoroutineScope.launch {
                     infoScreenViewModel.apiResponse.collect {
-                        apiResponse.value = it
+                        when (it) {
+                            is ResultState.Success -> apiResponse.value = it.data
+                        }
                     }
                 }
+
             },
             modifier = Modifier.padding(top = 10.dp)
         ) {
@@ -66,7 +90,7 @@ fun InfoScreen(infoScreenViewModel: InfoScreenViewModel = viewModel()) {
         }
         if (apiRequestSent.value)
             ManageApiResponse(
-                currentLocation = currentLocation,
+                currentLocation = location,
                 apiResponse = apiResponse.value
             )
     }

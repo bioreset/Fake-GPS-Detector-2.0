@@ -1,103 +1,92 @@
 package com.dariusz.fakegpsdetector.presentation.screens.infoscreen
 
-import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
+import android.annotation.SuppressLint
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.dariusz.fakegpsdetector.di.DataSourceModule.provideCellTowersData
-import com.dariusz.fakegpsdetector.di.DataSourceModule.provideCellTowersDataApi29Plus
-import com.dariusz.fakegpsdetector.di.DataSourceModule.provideLocationData
-import com.dariusz.fakegpsdetector.di.DataSourceModule.provideWifiScanResults
 import com.dariusz.fakegpsdetector.domain.model.*
 import com.dariusz.fakegpsdetector.domain.model.RoutersListModel.Companion.newRoutersList
+import com.dariusz.fakegpsdetector.domain.repository.CellTowersDataRepository
 import com.dariusz.fakegpsdetector.domain.repository.LocationFromApiResponseRepository
+import com.dariusz.fakegpsdetector.domain.repository.LocationRepository
+import com.dariusz.fakegpsdetector.domain.repository.WifiNodesRepository
 import com.dariusz.fakegpsdetector.utils.CellTowersUtils.mapCellTowers
+import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.launchVMTask
+import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.manageResult
+import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.manageResultFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-@RequiresApi(Build.VERSION_CODES.P)
+
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @HiltViewModel
 class InfoScreenViewModel
 @Inject
 constructor(
-    private val locationFromApiResponseRepository: LocationFromApiResponseRepository
+    private val locationFromApiResponseRepository: LocationFromApiResponseRepository,
+    private val locationRepository: LocationRepository,
+    private val wifiNodesRepository: WifiNodesRepository,
+    private val cellTowersRepository: CellTowersDataRepository
 ) : ViewModel() {
 
-    private var _currentLocation = MutableStateFlow(LocationModel(0.0, 0.0))
-    val currentLocation: StateFlow<LocationModel> = _currentLocation
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), LocationModel(0.0, 0.0))
+    private var _currentLocation = MutableStateFlow<ResultState<LocationModel>>(ResultState.Loading)
+    val currentLocation: StateFlow<ResultState<LocationModel>> = _currentLocation
 
-    private var _currentRouters = MutableStateFlow(listOf<RoutersListModel>())
-    val currentRouters: StateFlow<List<RoutersListModel>> = _currentRouters
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
+    private var _currentRouters =
+        MutableStateFlow<ResultState<List<RoutersListModel>>>(ResultState.Loading)
+    val currentRouters: StateFlow<ResultState<List<RoutersListModel>>> = _currentRouters
 
-    private var _currentCellTowers = MutableStateFlow(listOf<CellTowerModel>())
-    val currentCellTowers: StateFlow<List<CellTowerModel>> = _currentCellTowers
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
+    private var _currentCellTowers =
+        MutableStateFlow<ResultState<List<CellTowerModel>>>(ResultState.Loading)
+    val currentCellTowers: StateFlow<ResultState<List<CellTowerModel>>> = _currentCellTowers
 
-    fun initScreenTasks(context: Context) {
-        getLocationDataOnce(context)
-        getWifiNodesData(context)
+    private var _apiResponse = MutableStateFlow<ResultState<ApiResponseModel>>(ResultState.Loading)
+    val apiResponse: StateFlow<ResultState<ApiResponseModel>> = _apiResponse
+
+    init {
+        getLocationDataOnce()
+        getCellTowersData()
+        getWifiNodesData()
     }
 
-    private fun getLocationDataOnce(context: Context) = viewModelScope.launch {
-        _currentLocation.value = provideLocationData(context).getCurrentLocationOnce()
-    }
-
-    fun getCellTowersData(context: Context) = viewModelScope.launch {
-        provideCellTowersData(context)
-            .getCurrentCellTowersLive()
-            .collect { cellTowers ->
-                _currentCellTowers.value = mapCellTowers(cellTowers)
-            }
-    }
-
-    @RequiresApi(Build.VERSION_CODES.Q)
-    fun getCellTowersDataLiveApi29Plus(context: Context) =
-        viewModelScope.launch {
-            provideCellTowersDataApi29Plus(context)
-                .getCurrentCellTowersLive()
-                .collect { cellTowers ->
-                    _currentCellTowers.value = mapCellTowers(cellTowers)
-                }
-        }
-
-    private fun getWifiNodesData(context: Context) = viewModelScope.launch {
-        provideWifiScanResults(context)
-            .getCurrentScanResultsLive()
-            .collect { wifiNodes ->
-                _currentRouters.value = newRoutersList(wifiNodes)
-            }
-    }
-
-
-    private var _apiResponse = MutableSharedFlow<ApiResponseModel>(replay = 1)
-    val apiResponse: SharedFlow<ApiResponseModel> = _apiResponse
-        .shareIn(
-            viewModelScope,
-            SharingStarted.Eagerly,
-            1
+    private fun getLocationDataOnce() = launchVMTask {
+        manageResult(
+            _currentLocation,
+            locationRepository.getLocationDataOnce()
         )
+    }
 
+    @SuppressLint("NewApi")
+    private fun getCellTowersData() = launchVMTask {
+        manageResultFlow(
+            _currentCellTowers,
+            cellTowersRepository.getCellTowers().map { mapCellTowers(it) }
+        )
+    }
+
+    @SuppressLint("NewApi")
+    private fun getWifiNodesData() = launchVMTask {
+        manageResultFlow(
+            _currentRouters,
+            wifiNodesRepository.getWifiNodes().map { newRoutersList(it) }
+        )
+    }
 
     @InternalCoroutinesApi
     fun submitRequest(
         cellTowers: List<CellTowerModel>,
         wifiNodes: List<RoutersListModel>
-    ) = viewModelScope.launch {
-        _apiResponse.emit(
+    ) = launchVMTask {
+        manageResult(
+            _apiResponse,
             locationFromApiResponseRepository
                 .checkCurrentLocationOfTheDevice(
                     ApiRequestModel(wifiNodes, cellTowers)
                 )
         )
-
     }
 }

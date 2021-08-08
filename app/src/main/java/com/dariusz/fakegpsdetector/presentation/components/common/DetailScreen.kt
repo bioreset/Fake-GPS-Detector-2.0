@@ -16,8 +16,6 @@ import androidx.compose.ui.text.withStyle
 import com.dariusz.fakegpsdetector.domain.model.CellTowerModel
 import com.dariusz.fakegpsdetector.domain.model.RoutersListModel
 
-private val textColumnStyle = SpanStyle(fontWeight = FontWeight.SemiBold)
-
 @Composable
 fun CellTowerDetailBox(cellInfoData: CellTowerModel) {
     val openDialog = remember { mutableStateOf(true) }
@@ -77,7 +75,7 @@ fun WifiNodeDetailBox(wifiNodeData: RoutersListModel) {
 fun BaseDetail(
     title: String,
     content: String,
-    style: SpanStyle = textColumnStyle
+    style: SpanStyle = SpanStyle(fontWeight = FontWeight.SemiBold)
 ) {
     Card {
         Column {

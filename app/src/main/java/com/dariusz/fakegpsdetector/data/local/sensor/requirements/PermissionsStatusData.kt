@@ -4,16 +4,11 @@ import android.content.Context
 import android.content.pm.PackageManager
 import androidx.core.app.ActivityCompat
 import com.dariusz.fakegpsdetector.domain.model.PermissionStatusModel
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.shareIn
 import javax.inject.Inject
 
 interface PermissionsStatusData {
 
-    fun getLivePermissionStatus(permissionsToListen: List<String>): Flow<PermissionStatusModel>
+    fun getLivePermissionStatus(permissionsToListen: List<String>): PermissionStatusModel
 
 }
 
@@ -23,19 +18,11 @@ constructor(
     private val context: Context
 ) : PermissionsStatusData {
 
-    override fun getLivePermissionStatus(permissionsToListen: List<String>): Flow<PermissionStatusModel> =
+    override fun getLivePermissionStatus(permissionsToListen: List<String>): PermissionStatusModel =
         context.livePermissionsStatus(permissionsToListen)
 
-    private fun Context.livePermissionsStatus(permissionsToListen: List<String>): Flow<PermissionStatusModel> {
-        val permissionStatus =
-            handlePermissionCheck(checkPermissions(applicationContext, permissionsToListen))
-        return flow {
-            emit(permissionStatus)
-        }.shareIn(
-            MainScope(),
-            SharingStarted.WhileSubscribed()
-        )
-    }
+    private fun Context.livePermissionsStatus(permissionsToListen: List<String>): PermissionStatusModel =
+        handlePermissionCheck(checkPermissions(applicationContext, permissionsToListen))
 
     private fun handlePermissionCheck(status: Boolean): PermissionStatusModel {
         return if (status)

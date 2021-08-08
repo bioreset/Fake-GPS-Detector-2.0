@@ -1,8 +1,6 @@
 package com.dariusz.fakegpsdetector.di
 
 import com.dariusz.fakegpsdetector.data.remote.api.FakeGPSRestApi
-import com.dariusz.fakegpsdetector.data.remote.api.FakeGPSRestApiService
-import com.dariusz.fakegpsdetector.data.remote.api.FakeGPSRestApiServiceImpl
 import com.dariusz.fakegpsdetector.utils.Constants.API_URL
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -23,23 +21,24 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private val logging: Interceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BASIC
-        level = HttpLoggingInterceptor.Level.BODY
-        level = HttpLoggingInterceptor.Level.HEADERS
-    }
-
-    private val client = OkHttpClient.Builder()
-        .addNetworkInterceptor(logging).build()
-
-    private val moshi: Moshi =
-        Moshi.Builder()
-            .addLast(KotlinJsonAdapterFactory())
-            .build()
-
     @Provides
-    fun provideRetrofit(): FakeGPSRestApi =
-        Retrofit.Builder()
+    fun provideRetrofit(): FakeGPSRestApi {
+
+        val logging: Interceptor = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BASIC
+            level = HttpLoggingInterceptor.Level.BODY
+            level = HttpLoggingInterceptor.Level.HEADERS
+        }
+
+        val client = OkHttpClient.Builder()
+            .addNetworkInterceptor(logging).build()
+
+        val moshi: Moshi =
+            Moshi.Builder()
+                .addLast(KotlinJsonAdapterFactory())
+                .build()
+
+        return Retrofit.Builder()
             .baseUrl(API_URL)
             .addConverterFactory(ScalarsConverterFactory.create())
             .addConverterFactory(MoshiConverterFactory.create(moshi))
@@ -47,8 +46,6 @@ object NetworkModule {
             .build()
             .create(FakeGPSRestApi::class.java)
 
-    @Provides
-    fun provideRetrofitService(): FakeGPSRestApiService {
-        return FakeGPSRestApiServiceImpl()
     }
+
 }

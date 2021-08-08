@@ -7,7 +7,6 @@ import android.telephony.CellInfo
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresApi
-import com.dariusz.fakegpsdetector.utils.RepositoryUtils.performSensorCall
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -31,10 +30,7 @@ class CellTowersDataAPI29PlusImpl
 constructor(private val context: Context) : CellTowersDataAPI29Plus {
 
     override suspend fun getCurrentCellTowersLive(): Flow<List<CellInfo>> =
-        performSensorCall(
-            "get-current-cell-towers-live-api-29-plus",
-            context.getCurrentCellTowersAsFlow()
-        )
+        context.getCurrentCellTowersAsFlow()
 
     private suspend fun Context.getCurrentCellTowersAsFlow(): Flow<List<CellInfo>> {
         val subscriptionManager = getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)

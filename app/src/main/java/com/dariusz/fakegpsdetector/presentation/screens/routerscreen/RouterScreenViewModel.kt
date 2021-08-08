@@ -1,15 +1,16 @@
 package com.dariusz.fakegpsdetector.presentation.screens.routerscreen
 
-import android.content.Context
 import android.net.wifi.ScanResult
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.dariusz.fakegpsdetector.di.DataSourceModule.provideWifiScanResults
+import com.dariusz.fakegpsdetector.domain.model.ResultState
+import com.dariusz.fakegpsdetector.domain.repository.WifiNodesRepository
+import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.launchVMTask
+import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.manageResultFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
@@ -17,17 +18,22 @@ import javax.inject.Inject
 @HiltViewModel
 class RouterScreenViewModel
 @Inject
-constructor() : ViewModel() {
+constructor(
+    private val wifiNodesRepository: WifiNodesRepository
+) : ViewModel() {
 
-    private var _wifiNodes = MutableStateFlow(listOf<ScanResult>())
-    val wifiNodes: StateFlow<List<ScanResult>> = _wifiNodes
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), listOf())
+    private var _wifiNodes = MutableStateFlow<ResultState<List<ScanResult>>>(ResultState.Loading)
+    val wifiNodes: StateFlow<ResultState<List<ScanResult>>> = _wifiNodes
 
-    fun getWifiNodesDataLive(context: Context) =
-        viewModelScope.launch {
-            provideWifiScanResults(context).getCurrentScanResultsLive().collect { list ->
-                _wifiNodes.value = list
-            }
-        }
+    init {
+        getWifiNodesDataLive()
+    }
+
+    private fun getWifiNodesDataLive() = launchVMTask {
+        manageResultFlow(
+            _wifiNodes,
+            wifiNodesRepository.getWifiNodes()
+        )
+    }
 
 }

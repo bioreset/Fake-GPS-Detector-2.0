@@ -6,15 +6,11 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
-import com.dariusz.fakegpsdetector.utils.RepositoryUtils.performSensorCall
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.shareIn
 import javax.inject.Inject
 
 interface WifiScanResultsData {
@@ -32,7 +28,7 @@ constructor(
 ) : WifiScanResultsData {
 
     override suspend fun getCurrentScanResultsLive(): Flow<List<ScanResult>> =
-        performSensorCall("get-current-scan-results-live", context.getCurrentScanResultsAsFlow())
+        context.getCurrentScanResultsAsFlow()
 
     private suspend fun Context.getCurrentScanResultsAsFlow(): Flow<List<ScanResult>> {
         val wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -51,9 +47,6 @@ constructor(
             awaitClose {
                 unregisterReceiver(wifiScanReceiver)
             }
-        }.shareIn(
-            MainScope(),
-            SharingStarted.WhileSubscribed()
-        )
+        }
     }
 }

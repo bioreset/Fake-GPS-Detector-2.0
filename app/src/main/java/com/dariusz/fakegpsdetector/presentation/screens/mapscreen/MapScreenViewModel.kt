@@ -1,15 +1,16 @@
 package com.dariusz.fakegpsdetector.presentation.screens.mapscreen
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.dariusz.fakegpsdetector.di.DataSourceModule.provideLocationData
 import com.dariusz.fakegpsdetector.domain.model.LocationModel
+import com.dariusz.fakegpsdetector.domain.model.ResultState
+import com.dariusz.fakegpsdetector.domain.repository.LocationRepository
+import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.launchVMTask
+import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.manageResultFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
@@ -17,18 +18,23 @@ import javax.inject.Inject
 @HiltViewModel
 class MapScreenViewModel
 @Inject
-constructor() : ViewModel() {
+constructor(
+    private val locationRepository: LocationRepository
+) : ViewModel() {
 
-    private var _locationData = MutableStateFlow(LocationModel(0.0, 0.0))
-    val locationData: StateFlow<LocationModel> = _locationData
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), LocationModel(0.0, 0.0))
+    private var _locationData = MutableStateFlow<ResultState<LocationModel>>(ResultState.Loading)
+    val locationData: StateFlow<ResultState<LocationModel>> = _locationData
 
-    fun getLocationLive(context: Context) =
-        viewModelScope.launch {
-            provideLocationData(context)
-                .getCurrentLocationLive().collect { location ->
-                    _locationData.value = location
-                }
-        }
+    init {
+        getLocationLive()
+    }
+
+    private fun getLocationLive() = launchVMTask {
+        manageResultFlow(
+            _locationData,
+            locationRepository.getLocationDataLive()
+        )
+    }
+
 
 }

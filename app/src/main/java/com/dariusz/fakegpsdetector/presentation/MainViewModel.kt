@@ -1,20 +1,18 @@
 package com.dariusz.fakegpsdetector.presentation
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.dariusz.fakegpsdetector.di.DataSourceModule.provideGPSStatus
-import com.dariusz.fakegpsdetector.di.DataSourceModule.providePermissionsStatus
-import com.dariusz.fakegpsdetector.di.DataSourceModule.provideWifiStatus
 import com.dariusz.fakegpsdetector.domain.model.GpsStatusModel
 import com.dariusz.fakegpsdetector.domain.model.PermissionStatusModel
+import com.dariusz.fakegpsdetector.domain.model.ResultState
 import com.dariusz.fakegpsdetector.domain.model.WifiStatusModel
-import com.dariusz.fakegpsdetector.utils.Constants.permissionToWatch
+import com.dariusz.fakegpsdetector.domain.repository.RequirementsRepository
+import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.launchVMTask
+import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.manageResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
 @ExperimentalCoroutinesApi
@@ -23,51 +21,44 @@ import javax.inject.Inject
 class MainViewModel
 @Inject
 constructor(
+    private val requirementsRepository: RequirementsRepository
 ) : ViewModel() {
 
-    private var _gpsStatus = MutableStateFlow(GpsStatusModel(false))
-    val gpsStatus: StateFlow<GpsStatusModel> = _gpsStatus
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), GpsStatusModel(false))
+    private var _gpsStatus = MutableStateFlow<ResultState<GpsStatusModel>>(ResultState.Loading)
+    val gpsStatus: StateFlow<ResultState<GpsStatusModel>> = _gpsStatus
 
-    private var _permissionsStatus = MutableStateFlow(PermissionStatusModel(false))
-    val permissionsStatus: StateFlow<PermissionStatusModel> = _permissionsStatus
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), PermissionStatusModel(false))
+    private var _permissionsStatus =
+        MutableStateFlow<ResultState<PermissionStatusModel>>(ResultState.Loading)
+    val permissionsStatus: StateFlow<ResultState<PermissionStatusModel>> = _permissionsStatus
 
-    private var _wifiStatus = MutableStateFlow(WifiStatusModel(false))
-    val wifiStatus: StateFlow<WifiStatusModel> = _wifiStatus
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), WifiStatusModel(false))
+    private var _wifiStatus = MutableStateFlow<ResultState<WifiStatusModel>>(ResultState.Loading)
+    val wifiStatus: StateFlow<ResultState<WifiStatusModel>> = _wifiStatus
 
-    fun initViewModel(context: Context) {
-        getGPSStatus(context)
-        getPermissionsStatus(context, permissionToWatch)
-        getWifiNetworkStatus(context)
+    init {
+        getGPSStatus()
+        getPermissionsStatus()
+        getWifiNetworkStatus()
     }
 
-    private fun getGPSStatus(context: Context) =
-        viewModelScope.launch {
-            provideGPSStatus(context)
-                .currentGpsStatus
-                .collect { status ->
-                    _gpsStatus.value = status
-                }
-        }
+    private fun getGPSStatus() = launchVMTask {
+        manageResult(
+            _gpsStatus,
+            requirementsRepository.getGpsStatus()
+        )
 
-    private fun getPermissionsStatus(
-        context: Context,
-        permissionsToListen: List<String>
-    ) = viewModelScope.launch {
-        providePermissionsStatus(context)
-            .getLivePermissionStatus(permissionsToListen).collect { status ->
-                _permissionsStatus.value = status
-            }
     }
 
-    private fun getWifiNetworkStatus(context: Context) =
-        viewModelScope.launch {
-            provideWifiStatus(context)
-                .currentWifiStatus
-                .collect { status ->
-                    _wifiStatus.value = status
-                }
-        }
+    private fun getPermissionsStatus() = launchVMTask {
+        manageResult(
+            _permissionsStatus,
+            requirementsRepository.getPermissionsStatus()
+        )
+    }
+
+    private fun getWifiNetworkStatus() = launchVMTask {
+        manageResult(
+            _wifiStatus,
+            requirementsRepository.getWifiStatus()
+        )
+    }
 }

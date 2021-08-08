@@ -1,7 +1,6 @@
 package com.dariusz.fakegpsdetector.utils
 
 import android.Manifest
-import kotlinx.coroutines.Dispatchers
 
 object Constants {
 
@@ -12,7 +11,7 @@ object Constants {
     const val API_KEY = ""
 
     // PERMISSION SETUP
-    val permissionToWatch = listOf(
+    val permissionsToWatch = listOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.ACCESS_WIFI_STATE,
@@ -22,10 +21,5 @@ object Constants {
 
     // MAP SETUP
     const val InitialZoom = 20F
-    const val MinZoom = 2F
-    const val MaxZoom = 60F
-
-    // DISPATCHERS
-    val dispatcherForSafeCalls = Dispatchers.IO
 
 }

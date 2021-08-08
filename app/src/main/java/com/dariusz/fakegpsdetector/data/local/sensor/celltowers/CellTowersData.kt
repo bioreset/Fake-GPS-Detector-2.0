@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.telephony.CellInfo
 import android.telephony.TelephonyManager
-import com.dariusz.fakegpsdetector.utils.RepositoryUtils.performSensorCall
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -29,7 +28,7 @@ class CellTowersDataImpl
 constructor(private val context: Context) : CellTowersData {
 
     override suspend fun getCurrentCellTowersLive(): Flow<List<CellInfo>> =
-        performSensorCall("get-current-cell-towers-live", context.getCurrentCellTowersAsFlow())
+        context.getCurrentCellTowersAsFlow()
 
     private suspend fun Context.getCurrentCellTowersAsFlow(): Flow<List<CellInfo>> {
         val telephonyManager: TelephonyManager =
@@ -50,5 +49,6 @@ constructor(private val context: Context) : CellTowersData {
                 unregisterReceiver(cellTowersScanReceiver)
             }
         }
+
     }
 }

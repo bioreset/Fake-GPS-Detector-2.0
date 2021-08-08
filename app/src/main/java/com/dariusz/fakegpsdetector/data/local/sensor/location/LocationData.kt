@@ -5,7 +5,6 @@ import android.content.Context
 import android.location.Location
 import android.os.Looper
 import com.dariusz.fakegpsdetector.domain.model.LocationModel
-import com.dariusz.fakegpsdetector.utils.RepositoryUtils.performSensorCall
 import com.google.android.gms.location.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -37,19 +36,15 @@ constructor(
     override suspend fun getCurrentLocationLive(): Flow<LocationModel> {
         val fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(context)
-        return performSensorCall(
-            "get-current-location-live",
-            fusedLocationProviderClient.getCurrentLocationAsFlow()
-        )
+        return fusedLocationProviderClient.getCurrentLocationAsFlow()
+
     }
 
     override suspend fun getCurrentLocationOnce(): LocationModel {
         val fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(context)
-        return performSensorCall(
-            "get-current-location-once",
-            fusedLocationProviderClient.getCurrentLocationOnce()
-        )
+        return fusedLocationProviderClient.getCurrentLocationOnce()
+
     }
 
     private suspend fun FusedLocationProviderClient.getCurrentLocationAsFlow(): Flow<LocationModel> =
