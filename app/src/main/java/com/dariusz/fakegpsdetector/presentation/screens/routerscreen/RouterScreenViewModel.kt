@@ -22,7 +22,7 @@ constructor(
     private val wifiNodesRepository: WifiNodesRepository
 ) : ViewModel() {
 
-    private var _wifiNodes = MutableStateFlow<ResultState<List<ScanResult>>>(ResultState.Loading)
+    private var _wifiNodes = MutableStateFlow<ResultState<List<ScanResult>>>(ResultState.Idle)
     val wifiNodes: StateFlow<ResultState<List<ScanResult>>> = _wifiNodes
 
     init {

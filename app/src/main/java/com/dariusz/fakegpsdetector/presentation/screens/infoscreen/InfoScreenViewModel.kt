@@ -33,18 +33,18 @@ constructor(
     private val cellTowersRepository: CellTowersDataRepository
 ) : ViewModel() {
 
-    private var _currentLocation = MutableStateFlow<ResultState<LocationModel>>(ResultState.Loading)
+    private var _currentLocation = MutableStateFlow<ResultState<LocationModel>>(ResultState.Idle)
     val currentLocation: StateFlow<ResultState<LocationModel>> = _currentLocation
 
     private var _currentRouters =
-        MutableStateFlow<ResultState<List<RoutersListModel>>>(ResultState.Loading)
+        MutableStateFlow<ResultState<List<RoutersListModel>>>(ResultState.Idle)
     val currentRouters: StateFlow<ResultState<List<RoutersListModel>>> = _currentRouters
 
     private var _currentCellTowers =
-        MutableStateFlow<ResultState<List<CellTowerModel>>>(ResultState.Loading)
+        MutableStateFlow<ResultState<List<CellTowerModel>>>(ResultState.Idle)
     val currentCellTowers: StateFlow<ResultState<List<CellTowerModel>>> = _currentCellTowers
 
-    private var _apiResponse = MutableStateFlow<ResultState<ApiResponseModel>>(ResultState.Loading)
+    private var _apiResponse = MutableStateFlow<ResultState<ApiResponseModel>>(ResultState.Idle)
     val apiResponse: StateFlow<ResultState<ApiResponseModel>> = _apiResponse
 
     init {

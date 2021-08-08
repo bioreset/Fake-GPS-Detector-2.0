@@ -60,7 +60,7 @@ object ViewModelsUtils {
         data.collect { inner ->
             innerData = inner
         }
-        value = ResultState.Idle
+        value = ResultState.Loading
         value = try {
             ResultState.Success(innerData!!)
         } catch (throwable: Throwable) {

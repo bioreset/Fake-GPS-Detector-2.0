@@ -22,7 +22,7 @@ constructor(
     private val cellTowersDataRepository: CellTowersDataRepository
 ) : ViewModel() {
 
-    private var _cellTowers = MutableStateFlow<ResultState<List<CellInfo>>>(ResultState.Loading)
+    private var _cellTowers = MutableStateFlow<ResultState<List<CellInfo>>>(ResultState.Idle)
     val cellTowers: StateFlow<ResultState<List<CellInfo>>> = _cellTowers
 
     init {

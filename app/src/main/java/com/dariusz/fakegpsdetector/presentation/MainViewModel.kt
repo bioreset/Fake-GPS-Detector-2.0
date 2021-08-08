@@ -24,14 +24,14 @@ constructor(
     private val requirementsRepository: RequirementsRepository
 ) : ViewModel() {
 
-    private var _gpsStatus = MutableStateFlow<ResultState<GpsStatusModel>>(ResultState.Loading)
+    private var _gpsStatus = MutableStateFlow<ResultState<GpsStatusModel>>(ResultState.Idle)
     val gpsStatus: StateFlow<ResultState<GpsStatusModel>> = _gpsStatus
 
     private var _permissionsStatus =
-        MutableStateFlow<ResultState<PermissionStatusModel>>(ResultState.Loading)
+        MutableStateFlow<ResultState<PermissionStatusModel>>(ResultState.Idle)
     val permissionsStatus: StateFlow<ResultState<PermissionStatusModel>> = _permissionsStatus
 
-    private var _wifiStatus = MutableStateFlow<ResultState<WifiStatusModel>>(ResultState.Loading)
+    private var _wifiStatus = MutableStateFlow<ResultState<WifiStatusModel>>(ResultState.Idle)
     val wifiStatus: StateFlow<ResultState<WifiStatusModel>> = _wifiStatus
 
     init {

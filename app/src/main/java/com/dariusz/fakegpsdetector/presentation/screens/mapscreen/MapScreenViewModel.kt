@@ -22,7 +22,7 @@ constructor(
     private val locationRepository: LocationRepository
 ) : ViewModel() {
 
-    private var _locationData = MutableStateFlow<ResultState<LocationModel>>(ResultState.Loading)
+    private var _locationData = MutableStateFlow<ResultState<LocationModel>>(ResultState.Idle)
     val locationData: StateFlow<ResultState<LocationModel>> = _locationData
 
     init {
