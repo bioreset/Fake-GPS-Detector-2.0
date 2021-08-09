@@ -34,13 +34,7 @@ constructor(
     private var _wifiStatus = MutableStateFlow<ResultState<WifiStatusModel>>(ResultState.Idle)
     val wifiStatus: StateFlow<ResultState<WifiStatusModel>> = _wifiStatus
 
-    init {
-        getGPSStatus()
-        getPermissionsStatus()
-        getWifiNetworkStatus()
-    }
-
-    private fun getGPSStatus() = launchVMTask {
+    fun getGPSStatus() = launchVMTask {
         manageResult(
             _gpsStatus,
             requirementsRepository.getGpsStatus()
@@ -48,14 +42,14 @@ constructor(
 
     }
 
-    private fun getPermissionsStatus() = launchVMTask {
+    fun getPermissionsStatus() = launchVMTask {
         manageResult(
             _permissionsStatus,
             requirementsRepository.getPermissionsStatus()
         )
     }
 
-    private fun getWifiNetworkStatus() = launchVMTask {
+    fun getWifiNetworkStatus() = launchVMTask {
         manageResult(
             _wifiStatus,
             requirementsRepository.getWifiStatus()

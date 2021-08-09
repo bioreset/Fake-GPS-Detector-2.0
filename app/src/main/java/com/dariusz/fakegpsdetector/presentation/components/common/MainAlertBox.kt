@@ -46,6 +46,13 @@ fun MainAlertBox() {
         if (!it.status) PermissionsAlert(currentContext)
     }
 
+    LaunchedEffect(Unit) {
+        viewModel.apply {
+            getGPSStatus()
+            getPermissionsStatus()
+            getWifiNetworkStatus()
+        }
+    }
 }
 
 @Composable

@@ -9,9 +9,9 @@ import com.dariusz.fakegpsdetector.domain.repository.LocationFromApiResponseRepo
 import com.dariusz.fakegpsdetector.domain.repository.LocationRepository
 import com.dariusz.fakegpsdetector.domain.repository.WifiNodesRepository
 import com.dariusz.fakegpsdetector.utils.CellTowersUtils.mapCellTowers
+import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.collectState
 import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.launchVMTask
 import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.manageResult
-import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.manageResultFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
-
 
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
@@ -47,13 +46,7 @@ constructor(
     private var _apiResponse = MutableStateFlow<ResultState<ApiResponseModel>>(ResultState.Idle)
     val apiResponse: StateFlow<ResultState<ApiResponseModel>> = _apiResponse
 
-    init {
-        getLocationDataOnce()
-        getCellTowersData()
-        getWifiNodesData()
-    }
-
-    private fun getLocationDataOnce() = launchVMTask {
+    fun getLocationDataOnce() = launchVMTask {
         manageResult(
             _currentLocation,
             locationRepository.getLocationDataOnce()
@@ -61,19 +54,19 @@ constructor(
     }
 
     @SuppressLint("NewApi")
-    private fun getCellTowersData() = launchVMTask {
-        manageResultFlow(
-            _currentCellTowers,
-            cellTowersRepository.getCellTowers().map { mapCellTowers(it) }
-        )
+    fun getCellTowersData(newApi: Boolean) = launchVMTask {
+        cellTowersRepository
+            .getCellTowers(newApi)
+            .map { mapCellTowers(it) }
+            .collectState(_currentCellTowers)
     }
 
     @SuppressLint("NewApi")
-    private fun getWifiNodesData() = launchVMTask {
-        manageResultFlow(
-            _currentRouters,
-            wifiNodesRepository.getWifiNodes().map { newRoutersList(it) }
-        )
+    fun getWifiNodesData() = launchVMTask {
+        wifiNodesRepository
+            .getWifiNodes()
+            .map { newRoutersList(it) }
+            .collectState(_currentRouters)
     }
 
     @InternalCoroutinesApi

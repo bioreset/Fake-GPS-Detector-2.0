@@ -8,7 +8,7 @@ object Constants {
     const val API_URL = "https://www.googleapis.com/"
     const val API_HEADER = "Content-Type: application/json"
     const val API_POST = "geolocation/v1/geolocate"
-    const val API_KEY = ""
+    const val API_KEY = "GOOGLE_GEOLOCATION_API_KEY"
 
     // PERMISSION SETUP
     val permissionsToWatch = listOf(
@@ -20,6 +20,6 @@ object Constants {
     )
 
     // MAP SETUP
-    const val InitialZoom = 20F
+    const val InitialZoom = 50F
 
 }

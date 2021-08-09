@@ -1,7 +1,6 @@
 package com.dariusz.fakegpsdetector.presentation.screens.infoscreen
 
 import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -11,22 +10,39 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.dariusz.fakegpsdetector.di.RepositoryModule.provideCellTowersDataRepository
+import com.dariusz.fakegpsdetector.di.RepositoryModule.provideLocationFromApiResponseRepository
+import com.dariusz.fakegpsdetector.di.RepositoryModule.provideLocationRepository
+import com.dariusz.fakegpsdetector.di.RepositoryModule.provideWifiNodesRepository
 import com.dariusz.fakegpsdetector.domain.model.*
 import com.dariusz.fakegpsdetector.presentation.components.common.BaseDetail
 import com.dariusz.fakegpsdetector.utils.DistanceCalculator
 import com.dariusz.fakegpsdetector.utils.ResultUtils.ManageResultsOnScreen
+import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.composeViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.P)
+
 @ExperimentalCoroutinesApi
 @InternalCoroutinesApi
 @Composable
-fun InfoScreen(infoScreenViewModel: InfoScreenViewModel) {
+fun InfoScreen() {
+
+    val currentContext = LocalContext.current
+
+    val infoScreenViewModel = composeViewModel {
+        InfoScreenViewModel(
+            provideLocationFromApiResponseRepository(),
+            provideLocationRepository(currentContext),
+            provideWifiNodesRepository(currentContext),
+            provideCellTowersDataRepository(currentContext)
+        )
+    }
 
     val currentCoroutineScope = rememberCoroutineScope()
     val currentLocation by remember(infoScreenViewModel) { infoScreenViewModel.currentLocation }.collectAsState()
@@ -46,6 +62,16 @@ fun InfoScreen(infoScreenViewModel: InfoScreenViewModel) {
                 cells = cell,
                 wifis = wifi
             )
+        }
+    }
+
+    val newApi = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+
+    LaunchedEffect(Unit) {
+        infoScreenViewModel.apply {
+            getLocationDataOnce()
+            getCellTowersData(newApi)
+            getWifiNodesData()
         }
     }
 }

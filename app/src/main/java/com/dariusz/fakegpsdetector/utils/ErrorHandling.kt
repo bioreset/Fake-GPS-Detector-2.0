@@ -39,6 +39,8 @@ object ErrorHandling {
                 "Unknown Error"
             )
         }
+    }.also {
+        printStackTrace()
     }
 
 

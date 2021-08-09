@@ -8,7 +8,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dariusz.fakegpsdetector.domain.model.ResultState
 import com.dariusz.fakegpsdetector.utils.ErrorHandling.displayError
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
@@ -40,36 +39,21 @@ object ViewModelsUtils {
             ResultState.Success(data)
         } catch (throwable: Throwable) {
             ResultState.Error(throwable).also {
-                throwable.printStackTrace()
                 throwable.displayError()
             }
         }
     }
 
-    @InternalCoroutinesApi
-    suspend fun <T> manageResultFlow(
-        mutableInput: MutableStateFlow<ResultState<T>>,
-        dataFromAction: Flow<T>
-    ) = mutableInput.getResultOfGenericResponseFlow(dataFromAction)
-
-    @InternalCoroutinesApi
-    private suspend fun <T> MutableStateFlow<ResultState<T>>.getResultOfGenericResponseFlow(
-        data: Flow<T>
-    ) {
-        var innerData: T? = null
-        data.collect { inner ->
-            innerData = inner
-        }
-        value = ResultState.Loading
-        value = try {
-            ResultState.Success(innerData!!)
-        } catch (throwable: Throwable) {
-            ResultState.Error(throwable).also {
-                throwable.printStackTrace()
-                throwable.displayError()
-            }
-        }
+    suspend fun <T> Flow<T>.collectState(
+        mutableInput: MutableStateFlow<ResultState<T>>
+    ) = collect {
+        mutableInput.value = asResultState(it).value
     }
+
+    private fun <T> asResultState(data: T): MutableStateFlow<ResultState<T>> {
+        return MutableStateFlow(ResultState.Success(data))
+    }
+
 
     private val ViewModel.ioTask
         get() = viewModelScope + Dispatchers.IO

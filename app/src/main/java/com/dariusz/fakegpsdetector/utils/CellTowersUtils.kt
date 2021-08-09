@@ -8,8 +8,8 @@ import com.dariusz.fakegpsdetector.domain.model.CellTowerModel
 
 object CellTowersUtils {
 
-    @RequiresApi(Build.VERSION_CODES.P)
-    @SuppressLint("ObsoleteSdkInt")
+
+    @SuppressLint("ObsoleteSdkInt", "NewApi")
     fun mapCellTowers(model: List<CellInfo>?): List<CellTowerModel> =
         model?.mapNotNull {
             if (it is CellInfoGsm) {

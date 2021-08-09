@@ -4,8 +4,8 @@ import android.telephony.CellInfo
 import androidx.lifecycle.ViewModel
 import com.dariusz.fakegpsdetector.domain.model.ResultState
 import com.dariusz.fakegpsdetector.domain.repository.CellTowersDataRepository
+import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.collectState
 import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.launchVMTask
-import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.manageResultFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -25,15 +25,9 @@ constructor(
     private var _cellTowers = MutableStateFlow<ResultState<List<CellInfo>>>(ResultState.Idle)
     val cellTowers: StateFlow<ResultState<List<CellInfo>>> = _cellTowers
 
-    init {
-        getCellTowersDataLive()
+    fun getCellTowersDataLive(newApi: Boolean) = launchVMTask {
+        cellTowersDataRepository
+            .getCellTowers(newApi)
+            .collectState(_cellTowers)
     }
-
-    private fun getCellTowersDataLive() = launchVMTask {
-        manageResultFlow(
-            _cellTowers,
-            cellTowersDataRepository.getCellTowers()
-        )
-    }
-
 }

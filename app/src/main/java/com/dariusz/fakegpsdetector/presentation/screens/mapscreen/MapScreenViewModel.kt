@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import com.dariusz.fakegpsdetector.domain.model.LocationModel
 import com.dariusz.fakegpsdetector.domain.model.ResultState
 import com.dariusz.fakegpsdetector.domain.repository.LocationRepository
+import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.collectState
 import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.launchVMTask
-import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.manageResultFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
@@ -25,15 +25,10 @@ constructor(
     private var _locationData = MutableStateFlow<ResultState<LocationModel>>(ResultState.Idle)
     val locationData: StateFlow<ResultState<LocationModel>> = _locationData
 
-    init {
-        getLocationLive()
-    }
-
-    private fun getLocationLive() = launchVMTask {
-        manageResultFlow(
-            _locationData,
-            locationRepository.getLocationDataLive()
-        )
+    fun getLocationLive() = launchVMTask {
+        locationRepository
+            .getLocationDataLive()
+            .collectState(_locationData)
     }
 
 
