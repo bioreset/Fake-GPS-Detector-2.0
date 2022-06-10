@@ -8,7 +8,7 @@ import java.io.IOException
 
 object ErrorHandling {
 
-    fun Throwable.displayError() = when (this) {
+    fun Throwable.logError() = when (this) {
         is TimeoutCancellationException -> {
             handleError(
                 "api-network-error: ",

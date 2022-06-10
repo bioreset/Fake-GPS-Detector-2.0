@@ -3,30 +3,35 @@ package com.dariusz.fakegpsdetector.data.local.sensor.requirements
 import android.content.Context
 import android.net.wifi.WifiManager
 import com.dariusz.fakegpsdetector.domain.model.WifiStatusModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
 interface WifiStatusData {
 
-    val currentWifiStatus: WifiStatusModel
+    val currentWifiStatus: Flow<WifiStatusModel>
 
 }
 
-@ExperimentalCoroutinesApi
 class WifiStatusDataImpl
 @Inject
 constructor(
-    context: Context
+    @ApplicationContext private val context: Context
 ) : WifiStatusData {
 
-    override val currentWifiStatus: WifiStatusModel = context.liveWifiStatus()
+    override val currentWifiStatus: Flow<WifiStatusModel> = context.liveWifiStatus()
 
-    private fun Context.liveWifiStatus(): WifiStatusModel {
+    private fun Context.liveWifiStatus(): Flow<WifiStatusModel> {
         val wifiManager = getSystemService(Context.WIFI_SERVICE) as? WifiManager
-        return getWifiStatus(wifiManager!!)
+        return flow { emit(getWifiStatus(wifiManager)) }
     }
 
-    private fun getWifiStatus(wifiManager: WifiManager) = isWifiEnabled(wifiManager.isWifiEnabled)
+    private fun getWifiStatus(wifiManager: WifiManager?) =
+        if (wifiManager != null)
+            isWifiEnabled(wifiManager.isWifiEnabled)
+        else
+            WifiStatusModel(status = false)
 
     private fun isWifiEnabled(status: Boolean): WifiStatusModel {
         return if (status)

@@ -1,23 +1,20 @@
 package com.dariusz.fakegpsdetector.presentation.components.common
 
-import androidx.compose.material.Scaffold
+import android.annotation.SuppressLint
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.navigation.compose.rememberNavController
-import com.dariusz.fakegpsdetector.domain.model.CurrentTheme
 import com.dariusz.fakegpsdetector.presentation.components.navigation.BottomNavigationBar
 import com.dariusz.fakegpsdetector.presentation.components.navigation.MainNavigationHost
 import com.dariusz.fakegpsdetector.presentation.components.theme.MainTheme
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
 
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FGDApp() {
     val navController = rememberNavController()
-    val theme = remember { CurrentTheme() }
-    MainTheme(theme) {
+    MainTheme {
         Scaffold(
             bottomBar = { BottomNavigationBar(navController) },
             content = {

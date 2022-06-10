@@ -22,13 +22,13 @@ class DistanceCalculator(
 
     private fun calculateDistance() = locationNumberOne.distanceTo(locationNumberTwo).roundToInt()
 
-    fun isRealLocation(accuracy: Int): Boolean {
+    fun isRealLocation(accuracy: Double): Boolean {
         mapLocations()
         return when {
-            calculateDistance() < 2 * accuracy -> {
+            calculateDistance() < 2 * accuracy.toInt() -> {
                 true
             }
-            calculateDistance() == accuracy -> {
+            calculateDistance() == accuracy.toInt() -> {
                 true
             }
             else -> {

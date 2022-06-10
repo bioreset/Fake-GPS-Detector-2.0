@@ -9,11 +9,7 @@ import com.dariusz.fakegpsdetector.presentation.screens.celltowerscreen.CellTowe
 import com.dariusz.fakegpsdetector.presentation.screens.infoscreen.InfoScreen
 import com.dariusz.fakegpsdetector.presentation.screens.mapscreen.MapScreen
 import com.dariusz.fakegpsdetector.presentation.screens.routerscreen.RouterScreen
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
 
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
 @Composable
 fun MainNavigationHost(
     navController: NavController

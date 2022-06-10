@@ -7,8 +7,7 @@ import android.telephony.CellInfo
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresApi
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -22,12 +21,10 @@ interface CellTowersDataAPI29Plus {
 }
 
 @SuppressLint("MissingPermission")
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
 @RequiresApi(Build.VERSION_CODES.Q)
 class CellTowersDataAPI29PlusImpl
 @Inject
-constructor(private val context: Context) : CellTowersDataAPI29Plus {
+constructor(@ApplicationContext private val context: Context) : CellTowersDataAPI29Plus {
 
     override suspend fun getCurrentCellTowersLive(): Flow<List<CellInfo>> =
         context.getCurrentCellTowersAsFlow()
@@ -46,11 +43,11 @@ constructor(private val context: Context) : CellTowersDataAPI29Plus {
                     }
                 }
                 telephonyManager.requestCellInfoUpdate(mainExecutor, cellTowersScanReceiver)
-                awaitClose {
-                    cancel()
-                }
-            }
 
+            }
+            awaitClose {
+                cancel()
+            }
         }
     }
 

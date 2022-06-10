@@ -7,8 +7,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.telephony.CellInfo
 import android.telephony.TelephonyManager
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -16,18 +15,16 @@ import javax.inject.Inject
 
 interface CellTowersData {
 
-    suspend fun getCurrentCellTowersLive(): Flow<List<CellInfo>>
+    suspend fun getCurrentCellTowers(): Flow<List<CellInfo>>
 
 }
 
 @SuppressLint("MissingPermission")
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
 class CellTowersDataImpl
 @Inject
-constructor(private val context: Context) : CellTowersData {
+constructor(@ApplicationContext private val context: Context) : CellTowersData {
 
-    override suspend fun getCurrentCellTowersLive(): Flow<List<CellInfo>> =
+    override suspend fun getCurrentCellTowers(): Flow<List<CellInfo>> =
         context.getCurrentCellTowersAsFlow()
 
     private suspend fun Context.getCurrentCellTowersAsFlow(): Flow<List<CellInfo>> {

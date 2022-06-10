@@ -9,6 +9,7 @@ import com.dariusz.fakegpsdetector.data.local.sensor.requirements.GpsStatusDataI
 import com.dariusz.fakegpsdetector.data.local.sensor.requirements.PermissionsStatusDataImpl
 import com.dariusz.fakegpsdetector.data.local.sensor.requirements.WifiStatusDataImpl
 import com.dariusz.fakegpsdetector.data.local.sensor.wifinodes.WifiScanResultsDataImpl
+import com.dariusz.fakegpsdetector.data.remote.api.FakeGPSRestApi
 import com.dariusz.fakegpsdetector.data.remote.api.FakeGPSRestApiServiceImpl
 import com.dariusz.fakegpsdetector.domain.repository.*
 import dagger.Module
@@ -16,26 +17,21 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
 
 @Module
-@InternalCoroutinesApi
-@ExperimentalCoroutinesApi
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {
 
-
     @Provides
-    fun provideLocationFromApiResponseRepository(): LocationFromApiResponseRepository =
-        LocationFromApiResponseRepositoryImpl(
-            FakeGPSRestApiServiceImpl()
+    fun provideLocationFromApiResponseRepository(retrofit: FakeGPSRestApi): LocationFromApiResponseRepository =
+        LocationFromApiResponseRepository(
+            FakeGPSRestApiServiceImpl(retrofit)
         )
 
     @SuppressLint("NewApi")
     @Provides
     fun provideCellTowersDataRepository(@ApplicationContext context: Context): CellTowersDataRepository =
-        CellTowersDataRepositoryImpl(
+        CellTowersDataRepository(
             CellTowersDataImpl(
                 context
             ),
@@ -46,7 +42,7 @@ object RepositoryModule {
 
     @Provides
     fun provideLocationRepository(@ApplicationContext context: Context): LocationRepository =
-        LocationRepositoryImpl(
+        LocationRepository(
             LocationDataImpl(
                 context
             )
@@ -54,7 +50,7 @@ object RepositoryModule {
 
     @Provides
     fun provideRequirementsRepository(@ApplicationContext context: Context): RequirementsRepository =
-        RequirementsRepositoryImpl(
+        RequirementsRepository(
             GpsStatusDataImpl(
                 context
             ),
@@ -68,7 +64,7 @@ object RepositoryModule {
 
     @Provides
     fun provideWifiNodesRepository(@ApplicationContext context: Context): WifiNodesRepository =
-        WifiNodesRepositoryImpl(
+        WifiNodesRepository(
             WifiScanResultsDataImpl(
                 context
             )
