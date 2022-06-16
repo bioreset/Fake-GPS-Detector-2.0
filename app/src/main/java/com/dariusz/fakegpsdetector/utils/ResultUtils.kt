@@ -8,6 +8,7 @@ import com.dariusz.fakegpsdetector.presentation.components.common.CenteredText
 import com.dariusz.fakegpsdetector.presentation.components.common.LoadingComponent
 import com.dariusz.fakegpsdetector.utils.ErrorHandling.logError
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 
 object ResultUtils {
@@ -43,6 +44,7 @@ object ResultUtils {
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private inline fun <T> Flow<T>.catchAndEmit(crossinline action: (Throwable) -> Unit): Flow<T> =
         flatMapLatest {
             flow { emit(it) }

@@ -44,18 +44,17 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.2.0-beta03"
+        kotlinCompilerExtensionVersion = "1.2.0-rc01"
     }
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.9.0-alpha04")
-    implementation("androidx.appcompat:appcompat:1.4.2")
+    implementation("androidx.core:core-ktx:1.9.0-alpha05")
+    implementation("androidx.activity:activity-compose:1.5.0-rc01")
 
     implementation("com.google.android.gms:play-services-maps:18.0.2")
     implementation("com.google.android.gms:play-services-location:20.0.0")
 
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.4.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0-rc01")
 
     implementation("com.squareup.moshi:moshi:1.13.0")
@@ -74,20 +73,24 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.42")
     kapt("com.google.dagger:hilt-android-compiler:2.42")
     kapt("androidx.hilt:hilt-compiler:1.0.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+
+    implementation("androidx.navigation:navigation-compose:2.5.0-rc02")
 
     implementation("com.google.maps.android:maps-compose:2.2.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
-    implementation("androidx.compose.ui:ui:1.2.0-beta03")
-    implementation("androidx.compose.foundation:foundation:1.2.0-beta03")
+
+    implementation("androidx.compose.ui:ui:1.2.0-rc01")
+    implementation("androidx.compose.foundation:foundation:1.2.0-rc01")
     implementation("androidx.compose.material3:material3:1.0.0-alpha13")
-    implementation("androidx.compose.runtime:runtime-livedata:1.2.0-beta03")
+    implementation("androidx.compose.material:material-icons-extended:1.2.0-rc01")
+    implementation("androidx.compose.ui:ui-tooling:1.2.0-rc01")
     implementation("com.google.android.material:compose-theme-adapter-3:1.0.11")
-    implementation("androidx.compose.material:material-icons-extended:1.2.0-beta03")
-    implementation("androidx.activity:activity-compose:1.5.0-rc01")
-    implementation("androidx.navigation:navigation-compose:2.5.0-rc01")
-    implementation("androidx.compose.ui:ui-tooling:1.2.0-beta03")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.3")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
 }

@@ -14,7 +14,7 @@ class GpsStatusData
 @Inject
 constructor(
     @ApplicationContext private val context: Context
-)  {
+) {
 
     val currentGpsStatus: Flow<GpsStatusModel> = context.liveGpsStatus()
 

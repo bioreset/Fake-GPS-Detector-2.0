@@ -3,7 +3,6 @@ package com.dariusz.fakegpsdetector.presentation.screens.infoscreen
 import android.os.Build
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.snapshots.Snapshot.Companion.withMutableSnapshot
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,7 +18,9 @@ import com.dariusz.fakegpsdetector.utils.CellTowersUtils.mapCellTowers
 import com.dariusz.fakegpsdetector.utils.ResultUtils.asResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,10 +34,12 @@ constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
+    @OptIn(SavedStateHandleSaveableApi::class)
     private var apiRequest by savedStateHandle.saveable {
         mutableStateOf(ApiRequestModel(listOf(), listOf()))
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     val viewState: StateFlow<Result<InfoScreenViewState>> = combine(
         locationRepository.getLocationData(),
         wifiNodesRepository.getWifiNodes(),

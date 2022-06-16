@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class FakeGPSRestApiService @Inject constructor(
     private val retrofit: FakeGPSRestApi
-){
+) {
 
     suspend fun checkCurrentLocation(
         jsonBody: ApiRequestModel

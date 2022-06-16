@@ -18,7 +18,7 @@ import javax.inject.Singleton
 @Singleton
 class CellTowersData
 @Inject
-constructor(@ApplicationContext private val context: Context)  {
+constructor(@ApplicationContext private val context: Context) {
 
     fun getCurrentCellTowers(): Flow<List<CellInfo>> =
         context.getCurrentCellTowersAsFlow()
