@@ -18,4 +18,4 @@ This application allows for validation of the current location of an Android dev
 - Coroutines
 - Dagger Hilt
 - Flows
-- **Jetpack Compose**
+- **Jetpack Compose with Material 3**

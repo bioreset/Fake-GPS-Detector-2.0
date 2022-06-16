@@ -1,92 +1,61 @@
 package com.dariusz.fakegpsdetector.utils
 
+import android.util.Log
 import androidx.compose.runtime.Composable
-import com.dariusz.fakegpsdetector.domain.model.ResultState
+import androidx.compose.runtime.State
+import com.dariusz.fakegpsdetector.domain.model.Result
 import com.dariusz.fakegpsdetector.presentation.components.common.CenteredText
 import com.dariusz.fakegpsdetector.presentation.components.common.LoadingComponent
+import com.dariusz.fakegpsdetector.utils.ErrorHandling.logError
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 
+@OptIn(ExperimentalCoroutinesApi::class)
 object ResultUtils {
 
-    @Composable
-    fun <T> ManageResultOnScreen(
-        input: ResultState<T>,
-        content: @Composable (T) -> Unit,
-    ) {
-        when (input) {
-            is ResultState.Loading -> {
-                LoadingComponent()
+    fun <T> Flow<T>.asResult(
+        coroutineScope: CoroutineScope
+    ): StateFlow<Result<T>> {
+        return this
+            .onStart {
+                delay(1000)
             }
-            is ResultState.Success -> {
-                content.invoke(input.data)
+            .map<T, Result<T>> {
+                Log.d("flow-data-result", it.toString())
+                Result.Success(it)
             }
-            is ResultState.Error -> {
-                CenteredText("Error: ${input.throwable}")
+            .catchAndEmit {
+                Result.Error(it)
             }
-            is ResultState.Idle -> {
-                //default option; do nothing
-            }
-        }
+            .stateIn(
+                scope = coroutineScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = Result.Loading
+            )
     }
 
     @Composable
-    fun <T, R, P> ManageResultsOnScreen(
-        inputOne: ResultState<T>,
-        inputTwo: ResultState<R>? = null,
-        inputThree: ResultState<P>? = null,
-        content: @Composable (T, R?, P?) -> Unit,
-    ) {
-        when (inputOne) {
-            is ResultState.Loading -> {
-                LoadingComponent()
-            }
-            is ResultState.Success -> {
-                when (inputTwo) {
-                    is ResultState.Loading -> {
-                        LoadingComponent()
-                    }
-                    is ResultState.Success -> {
-                        if (inputThree == null) {
-                            content.invoke(
-                                inputOne.data,
-                                inputTwo.data,
-                                null
-                            )
-                        } else {
-                            when (inputThree) {
-                                is ResultState.Loading -> {
-                                    LoadingComponent()
-                                }
-                                is ResultState.Success -> {
-                                    content.invoke(
-                                        inputOne.data,
-                                        inputTwo.data,
-                                        inputThree.data
-                                    )
-                                }
-                                is ResultState.Error -> {
-                                    CenteredText("Error: ${inputThree.throwable}")
-                                }
-                                is ResultState.Idle -> {
-                                    //default option; do nothing
-                                }
-                            }
-                        }
-                    }
-                    is ResultState.Error -> {
-                        CenteredText("Error: ${inputTwo.throwable}")
-                    }
-                    is ResultState.Idle -> {
-                        //default option; do nothing
-                    }
-                }
-            }
-            is ResultState.Error -> {
-                CenteredText("Error: ${inputOne.throwable}")
-            }
-            is ResultState.Idle -> {
-                //default option; do nothing
-            }
+    fun <T> State<Result<T>>.showOnScreen(content: @Composable (T) -> Unit) = when (value) {
+        is Result.Success<T> -> {
+            content((value as Result.Success<T>).data)
+        }
+        is Result.Error -> {
+            CenteredText("Error: ${(value as Result.Error).throwable}")
+        }
+        is Result.Loading -> {
+            LoadingComponent()
         }
     }
+
+    private inline fun <T> Flow<T>.catchAndEmit(crossinline action: (Throwable) -> Unit): Flow<T> =
+        flatMapLatest {
+            flow { emit(it) }
+                .catch {
+                    it.logError()
+                    action(it)
+                }
+        }
 
 }

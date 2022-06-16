@@ -2,27 +2,19 @@ package com.dariusz.fakegpsdetector.domain.repository
 
 import com.dariusz.fakegpsdetector.data.remote.api.FakeGPSRestApiService
 import com.dariusz.fakegpsdetector.domain.model.ApiRequestModel
-import com.dariusz.fakegpsdetector.domain.model.ApiResponseModel
-import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
-interface LocationFromApiResponseRepository {
-
-    suspend fun checkCurrentLocationOfTheDevice(
-        body: ApiRequestModel
-    ): ApiResponseModel
-
-}
-
-@InternalCoroutinesApi
-class LocationFromApiResponseRepositoryImpl
+@Singleton
+class LocationFromApiResponseRepository
 @Inject
 constructor(
     private val fakeGPSRestApiService: FakeGPSRestApiService
-) : LocationFromApiResponseRepository {
+) {
 
-    override suspend fun checkCurrentLocationOfTheDevice(
+    suspend fun checkCurrentLocationOfTheDevice(
         body: ApiRequestModel
-    ) = fakeGPSRestApiService.checkCurrentLocation(body)
+    ) = flow { emit(fakeGPSRestApiService.checkCurrentLocation(body)) }
 
 }

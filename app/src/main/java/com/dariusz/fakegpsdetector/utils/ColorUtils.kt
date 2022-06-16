@@ -1,7 +1,6 @@
 package com.dariusz.fakegpsdetector.utils
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.graphics.ColorUtils
 
@@ -11,11 +10,7 @@ object ColorUtils {
         return if (isLightColor()) Color.Black else Color.White
     }
 
-    fun Color.variantColor(): Color {
-        return lerp(this, Color.Black, 0.3f)
-    }
-
-    fun Color.isLightColor(): Boolean {
+    private fun Color.isLightColor(): Boolean {
         val contrastForBlack = calculateContrast(foreground = Color.Black)
         val contrastForWhite = calculateContrast(foreground = Color.White)
         return contrastForBlack > contrastForWhite

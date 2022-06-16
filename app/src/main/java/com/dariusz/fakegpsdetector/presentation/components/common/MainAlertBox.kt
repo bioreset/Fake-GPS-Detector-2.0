@@ -5,55 +5,52 @@ import android.content.Intent
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.dariusz.fakegpsdetector.R
-import com.dariusz.fakegpsdetector.di.RepositoryModule.provideRequirementsRepository
+import com.dariusz.fakegpsdetector.domain.model.GpsStatusModel
+import com.dariusz.fakegpsdetector.domain.model.PermissionStatusModel
+import com.dariusz.fakegpsdetector.domain.model.WifiStatusModel
 import com.dariusz.fakegpsdetector.presentation.MainViewModel
-import com.dariusz.fakegpsdetector.utils.Constants.permissionsToWatch
-import com.dariusz.fakegpsdetector.utils.ResultUtils.ManageResultOnScreen
-import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.composeViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
 
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
 @Composable
 fun MainAlertBox() {
 
     val currentContext = LocalContext.current
 
-    val viewModel = composeViewModel {
-        MainViewModel(
-            provideRequirementsRepository(currentContext)
-        )
-    }
+    val viewModel: MainViewModel = hiltViewModel()
 
-    val currentGPSStatus by remember(viewModel) { viewModel.gpsStatus }.collectAsState()
-    val currentWifiStatus by remember(viewModel) { viewModel.wifiStatus }.collectAsState()
-    val currentPermissionsStatus by remember(viewModel) { viewModel.permissionsStatus }.collectAsState()
+    val requirementsStatus by viewModel.requirementsStatus.collectAsState()
 
-    ManageResultOnScreen(currentGPSStatus) {
-        if (!it.status) GpsAlert(currentContext)
-    }
-    ManageResultOnScreen(currentWifiStatus) {
-        if (!it.status) WifiAlert(currentContext)
-    }
-    ManageResultOnScreen(currentPermissionsStatus) {
-        if (!it.status) PermissionsAlert(currentContext)
-    }
-
-    LaunchedEffect(Unit) {
-        viewModel.apply {
-            getGPSStatus()
-            getPermissionsStatus()
-            getWifiNetworkStatus()
-        }
-    }
+    ShowAlerts(
+        context = currentContext,
+        gpsStatusModel = requirementsStatus.gpsStatusModel,
+        wifiStatusModel = requirementsStatus.wifiStatusModel,
+        permissionStatusModel = requirementsStatus.permissionStatusModel
+    )
 }
+
+@Composable
+fun ShowAlerts(
+    context: Context,
+    gpsStatusModel: GpsStatusModel,
+    wifiStatusModel: WifiStatusModel,
+    permissionStatusModel: PermissionStatusModel
+) {
+    if (!gpsStatusModel.status)
+        GpsAlert(context)
+
+    if (!wifiStatusModel.status)
+        WifiAlert(context)
+
+    if (!permissionStatusModel.status)
+        PermissionsAlert(context, permissionStatusModel.neededPermissions!!)
+}
+
 
 @Composable
 fun WifiAlert(currentContext: Context) {
@@ -104,7 +101,7 @@ fun GpsAlert(currentContext: Context) {
 }
 
 @Composable
-fun PermissionsAlert(currentContext: Context) {
+fun PermissionsAlert(currentContext: Context, permissionsToBeGranted: List<String>) {
     val openDialog = remember { mutableStateOf(true) }
     val launcher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -121,7 +118,7 @@ fun PermissionsAlert(currentContext: Context) {
                     onClick = {
                         openDialog.value = false
                         launcher.launch(
-                            permissionsToWatch.toTypedArray()
+                            permissionsToBeGranted.toTypedArray()
                         )
                     }
                 ) {

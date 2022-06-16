@@ -1,34 +1,25 @@
 package com.dariusz.fakegpsdetector.presentation.screens.routerscreen
 
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
-import com.dariusz.fakegpsdetector.di.RepositoryModule.provideWifiNodesRepository
+import androidx.compose.runtime.collectAsState
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.dariusz.fakegpsdetector.domain.model.RoutersListModel.Companion.newRoutersList
-import com.dariusz.fakegpsdetector.presentation.components.common.CardWifiNodes
-import com.dariusz.fakegpsdetector.utils.ResultUtils.ManageResultOnScreen
-import com.dariusz.fakegpsdetector.utils.ScreenUtlls.ShowScreen
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
+import com.dariusz.fakegpsdetector.presentation.components.common.WifiNodeItemCard
+import com.dariusz.fakegpsdetector.utils.ResultUtils.showOnScreen
 
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
 @Composable
-fun RouterScreen() {
-    ShowScreen(
-        viewModel = { context ->
-            RouterScreenViewModel(
-                provideWifiNodesRepository(context)
-            )
-        },
-        data = { viewModel ->
-            viewModel.wifiNodes
-        },
-        composable = { resultState ->
-            ManageResultOnScreen(resultState) { result ->
-                CardWifiNodes(newRoutersList(result))
+fun RouterScreen(viewModel: RouterScreenViewModel = hiltViewModel()) {
+
+    val wifiNodes = viewModel.wifiNodes.collectAsState()
+
+    wifiNodes.showOnScreen {
+        LazyColumn {
+            items(newRoutersList(it)) { wifiNode ->
+                WifiNodeItemCard(wifiNode)
             }
-        },
-        launchedEffect = { viewModel ->
-            viewModel.getWifiNodesDataLive()
         }
-    )
+    }
+
 }

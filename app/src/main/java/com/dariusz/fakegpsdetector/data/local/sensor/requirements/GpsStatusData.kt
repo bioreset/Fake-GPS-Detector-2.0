@@ -3,27 +3,24 @@ package com.dariusz.fakegpsdetector.data.local.sensor.requirements
 import android.content.Context
 import android.location.LocationManager
 import com.dariusz.fakegpsdetector.domain.model.GpsStatusModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
-interface GpsStatusData {
-
-    val currentGpsStatus: GpsStatusModel
-
-}
-
-@ExperimentalCoroutinesApi
-class GpsStatusDataImpl
+@Singleton
+class GpsStatusData
 @Inject
 constructor(
-    context: Context
-) : GpsStatusData {
+    @ApplicationContext private val context: Context
+) {
 
-    override val currentGpsStatus: GpsStatusModel = context.liveGpsStatus()
+    val currentGpsStatus: Flow<GpsStatusModel> = context.liveGpsStatus()
 
-    private fun Context.liveGpsStatus(): GpsStatusModel {
+    private fun Context.liveGpsStatus(): Flow<GpsStatusModel> {
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        return checkGpsStatus(locationManager)
+        return flow { emit(checkGpsStatus(locationManager)) }
     }
 
     private fun checkGpsStatus(locationManager: LocationManager) = isGpsEnabled(

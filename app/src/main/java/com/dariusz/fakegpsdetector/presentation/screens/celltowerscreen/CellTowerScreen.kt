@@ -1,38 +1,24 @@
 package com.dariusz.fakegpsdetector.presentation.screens.celltowerscreen
 
-import android.os.Build
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
-import com.dariusz.fakegpsdetector.di.RepositoryModule.provideCellTowersDataRepository
-import com.dariusz.fakegpsdetector.presentation.components.common.CardCellTowers
+import androidx.compose.runtime.collectAsState
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.dariusz.fakegpsdetector.presentation.components.common.CellTowerItemCard
 import com.dariusz.fakegpsdetector.utils.CellTowersUtils.mapCellTowers
-import com.dariusz.fakegpsdetector.utils.ResultUtils.ManageResultOnScreen
-import com.dariusz.fakegpsdetector.utils.ScreenUtlls.ShowScreen
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
+import com.dariusz.fakegpsdetector.utils.ResultUtils.showOnScreen
 
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
 @Composable
-fun CellTowerScreen() {
+fun CellTowerScreen(viewModel: CellTowerScreenViewModel = hiltViewModel()) {
 
-    val newApi = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+    val cellTowers = viewModel.cellTowers.collectAsState()
 
-    ShowScreen(
-        viewModel = { context ->
-            CellTowerScreenViewModel(
-                provideCellTowersDataRepository(context)
-            )
-        },
-        data = {
-            it.cellTowers
-        },
-        composable = { resultState ->
-            ManageResultOnScreen(resultState) {
-                CardCellTowers(mapCellTowers(it))
+    cellTowers.showOnScreen {
+        LazyColumn {
+            items(mapCellTowers(it)) { cellTowerItem ->
+                CellTowerItemCard(cellTowerItem)
             }
-        },
-        launchedEffect = {
-            it.getCellTowersDataLive(newApi)
         }
-    )
+    }
 }

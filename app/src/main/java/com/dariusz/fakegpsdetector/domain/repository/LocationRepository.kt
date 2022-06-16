@@ -1,25 +1,15 @@
 package com.dariusz.fakegpsdetector.domain.repository
 
 import com.dariusz.fakegpsdetector.data.local.sensor.location.LocationData
-import com.dariusz.fakegpsdetector.domain.model.LocationModel
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
-interface LocationRepository {
-
-    suspend fun getLocationDataOnce(): LocationModel
-
-    suspend fun getLocationDataLive(): Flow<LocationModel>
-
-}
-
-class LocationRepositoryImpl
+@Singleton
+class LocationRepository
 @Inject constructor(
     private val locationData: LocationData
-) : LocationRepository {
+) {
 
-    override suspend fun getLocationDataOnce() = locationData.getCurrentLocationOnce()
-
-    override suspend fun getLocationDataLive() = locationData.getCurrentLocationLive()
+    fun getLocationData() = locationData.getCurrentLocation()
 
 }

@@ -6,38 +6,29 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiManager
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
+import javax.inject.Singleton
 
-interface WifiScanResultsData {
-
-    suspend fun getCurrentScanResultsLive(): Flow<List<ScanResult>>
-
-}
-
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
-class WifiScanResultsDataImpl
+@Singleton
+class WifiScanResultsData
 @Inject
 constructor(
-    private val context: Context
-) : WifiScanResultsData {
+    @ApplicationContext private val context: Context
+) {
 
-    override suspend fun getCurrentScanResultsLive(): Flow<List<ScanResult>> =
+    fun getCurrentScanResults(): Flow<List<ScanResult>> =
         context.getCurrentScanResultsAsFlow()
 
-    private suspend fun Context.getCurrentScanResultsAsFlow(): Flow<List<ScanResult>> {
+    private fun Context.getCurrentScanResultsAsFlow(): Flow<List<ScanResult>> {
         val wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
         return callbackFlow {
             val wifiScanReceiver = object : BroadcastReceiver() {
                 override fun onReceive(c: Context, intent: Intent) {
-                    if (intent.action == WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) {
-                        wifiManager.scanResults.let { trySend(it).isSuccess }
-                    }
+                    trySend(wifiManager.scanResults)
                 }
             }
             registerReceiver(

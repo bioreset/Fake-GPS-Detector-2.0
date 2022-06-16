@@ -1,33 +1,25 @@
 package com.dariusz.fakegpsdetector.presentation.screens.celltowerscreen
 
+import android.os.Build
 import android.telephony.CellInfo
 import androidx.lifecycle.ViewModel
-import com.dariusz.fakegpsdetector.domain.model.ResultState
+import androidx.lifecycle.viewModelScope
+import com.dariusz.fakegpsdetector.domain.model.Result
 import com.dariusz.fakegpsdetector.domain.repository.CellTowersDataRepository
-import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.collectState
-import com.dariusz.fakegpsdetector.utils.ViewModelsUtils.launchVMTask
+import com.dariusz.fakegpsdetector.utils.ResultUtils.asResult
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
 @HiltViewModel
 class CellTowerScreenViewModel
 @Inject
 constructor(
-    private val cellTowersDataRepository: CellTowersDataRepository
+    cellTowersDataRepository: CellTowersDataRepository
 ) : ViewModel() {
 
-    private var _cellTowers = MutableStateFlow<ResultState<List<CellInfo>>>(ResultState.Idle)
-    val cellTowers: StateFlow<ResultState<List<CellInfo>>> = _cellTowers
+    val cellTowers: StateFlow<Result<List<CellInfo>>> = cellTowersDataRepository
+        .getCellTowers(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+        .asResult(viewModelScope)
 
-    fun getCellTowersDataLive(newApi: Boolean) = launchVMTask {
-        cellTowersDataRepository
-            .getCellTowers(newApi)
-            .collectState(_cellTowers)
-    }
 }

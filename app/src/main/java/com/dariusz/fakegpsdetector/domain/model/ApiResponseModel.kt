@@ -8,7 +8,7 @@ data class ApiResponseModel(
     @field:Json(name = "location")
     var location: LocationData,
     @field:Json(name = "accuracy")
-    var accuracy: Int? = 0
+    var accuracy: Double? = 0.0
 )
 
 @JsonClass(generateAdapter = true)

@@ -8,7 +8,6 @@ import com.dariusz.fakegpsdetector.domain.model.CellTowerModel
 
 object CellTowersUtils {
 
-
     @SuppressLint("ObsoleteSdkInt", "NewApi")
     fun mapCellTowers(model: List<CellInfo>?): List<CellTowerModel> =
         model?.mapNotNull {

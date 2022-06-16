@@ -7,32 +7,25 @@ import android.telephony.CellInfo
 import android.telephony.SubscriptionManager
 import android.telephony.TelephonyManager
 import androidx.annotation.RequiresApi
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
-
-interface CellTowersDataAPI29Plus {
-
-    suspend fun getCurrentCellTowersLive(): Flow<List<CellInfo>>
-
-}
+import javax.inject.Singleton
 
 @SuppressLint("MissingPermission")
-@ExperimentalCoroutinesApi
-@InternalCoroutinesApi
 @RequiresApi(Build.VERSION_CODES.Q)
-class CellTowersDataAPI29PlusImpl
+@Singleton
+class CellTowersDataAPI29Plus
 @Inject
-constructor(private val context: Context) : CellTowersDataAPI29Plus {
+constructor(@ApplicationContext private val context: Context) {
 
-    override suspend fun getCurrentCellTowersLive(): Flow<List<CellInfo>> =
+    fun getCurrentCellTowersLive(): Flow<List<CellInfo>> =
         context.getCurrentCellTowersAsFlow()
 
-    private suspend fun Context.getCurrentCellTowersAsFlow(): Flow<List<CellInfo>> {
+    private fun Context.getCurrentCellTowersAsFlow(): Flow<List<CellInfo>> {
         val subscriptionManager = getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)
                 as SubscriptionManager
         return callbackFlow {
@@ -46,11 +39,11 @@ constructor(private val context: Context) : CellTowersDataAPI29Plus {
                     }
                 }
                 telephonyManager.requestCellInfoUpdate(mainExecutor, cellTowersScanReceiver)
-                awaitClose {
-                    cancel()
-                }
-            }
 
+            }
+            awaitClose {
+                cancel()
+            }
         }
     }
 

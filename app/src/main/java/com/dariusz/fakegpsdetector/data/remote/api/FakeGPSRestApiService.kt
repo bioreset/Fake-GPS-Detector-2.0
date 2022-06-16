@@ -1,27 +1,20 @@
 package com.dariusz.fakegpsdetector.data.remote.api
 
-import com.dariusz.fakegpsdetector.di.NetworkModule.provideRetrofit
 import com.dariusz.fakegpsdetector.domain.model.ApiRequestModel
 import com.dariusz.fakegpsdetector.domain.model.ApiResponseModel
 import com.dariusz.fakegpsdetector.utils.Constants.API_KEY
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
-import kotlinx.coroutines.InternalCoroutinesApi
+import javax.inject.Inject
 
-interface FakeGPSRestApiService {
+class FakeGPSRestApiService @Inject constructor(
+    private val retrofit: FakeGPSRestApi
+) {
 
     suspend fun checkCurrentLocation(
         jsonBody: ApiRequestModel
-    ): ApiResponseModel
-}
-
-class FakeGPSRestApiServiceImpl : FakeGPSRestApiService {
-
-    @InternalCoroutinesApi
-    override suspend fun checkCurrentLocation(
-        jsonBody: ApiRequestModel
     ): ApiResponseModel =
-        provideRetrofit().checkLocation(
+        retrofit.checkLocation(
             toJsonString(jsonBody),
             API_KEY
         )
