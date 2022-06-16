@@ -3,14 +3,16 @@ package com.dariusz.fakegpsdetector.domain.repository
 import com.dariusz.fakegpsdetector.data.local.sensor.celltowers.CellTowersData
 import com.dariusz.fakegpsdetector.data.local.sensor.celltowers.CellTowersDataAPI29Plus
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class CellTowersDataRepository
 @Inject constructor(
     private val cellTowersData: CellTowersData,
     private val cellTowersDataAPI29Plus: CellTowersDataAPI29Plus
 ) {
 
-    suspend fun getCellTowers(newApi: Boolean) =
+    fun getCellTowers(newApi: Boolean) =
         if (!newApi)
             cellTowersData.getCurrentCellTowers()
         else

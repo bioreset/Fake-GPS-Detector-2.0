@@ -1,5 +1,6 @@
 package com.dariusz.fakegpsdetector.utils
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import com.dariusz.fakegpsdetector.domain.model.Result
@@ -12,22 +13,20 @@ import kotlinx.coroutines.flow.*
 object ResultUtils {
 
     fun <T> Flow<T>.asResult(
-        viewModelScope: CoroutineScope,
-        initialValue: Result<T> = Result.Loading
+        coroutineScope: CoroutineScope
     ): StateFlow<Result<T>> {
         return this
             .map<T, Result<T>> {
+                Log.d("flow-data-result", it.toString())
                 Result.Success(it)
             }
-            .onStart { emit(Result.Loading) }
-            .catch {
-                emit(Result.Error(it))
-                it.logError()
+            .catchAndEmit {
+                Result.Error(it)
             }
             .stateIn(
-                scope = viewModelScope,
+                scope = coroutineScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = initialValue
+                initialValue = Result.Loading
             )
     }
 
@@ -37,10 +36,21 @@ object ResultUtils {
             content((value as Result.Success<T>).data)
         }
         is Result.Error -> {
-            CenteredText("Error: ${(value as Result.Error).throwable.localizedMessage}")
+            CenteredText("Error: ${(value as Result.Error).throwable}")
         }
-        else -> LoadingComponent()
+        is Result.Loading -> {
+            LoadingComponent()
+        }
     }
+
+    private inline fun <T> Flow<T>.catchAndEmit(crossinline action: (Throwable) -> Unit): Flow<T> =
+        flatMapLatest {
+            flow { emit(it) }
+                .catch {
+                    it.logError()
+                    action(it)
+                }
+        }
 
 
 }

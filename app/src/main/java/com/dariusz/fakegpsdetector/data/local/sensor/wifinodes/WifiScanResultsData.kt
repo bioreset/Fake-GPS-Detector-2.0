@@ -11,33 +11,24 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
+import javax.inject.Singleton
 
-interface WifiScanResultsData {
-
-    suspend fun getCurrentScanResults(): Flow<List<ScanResult>>
-
-}
-
-class WifiScanResultsDataImpl
+@Singleton
+class WifiScanResultsData
 @Inject
 constructor(
     @ApplicationContext private val context: Context
-) : WifiScanResultsData {
+) {
 
-    override suspend fun getCurrentScanResults(): Flow<List<ScanResult>> =
+    fun getCurrentScanResults(): Flow<List<ScanResult>> =
         context.getCurrentScanResultsAsFlow()
 
-    private suspend fun Context.getCurrentScanResultsAsFlow(): Flow<List<ScanResult>> {
+    private fun Context.getCurrentScanResultsAsFlow(): Flow<List<ScanResult>> {
         val wifiManager = getSystemService(Context.WIFI_SERVICE) as WifiManager
         return callbackFlow {
             val wifiScanReceiver = object : BroadcastReceiver() {
                 override fun onReceive(c: Context, intent: Intent) {
-                    if (intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)) {
-                        trySend(wifiManager.scanResults)
-                    }
-                    else {
-                        trySend(listOf())
-                    }
+                    trySend(wifiManager.scanResults)
                 }
             }
             registerReceiver(

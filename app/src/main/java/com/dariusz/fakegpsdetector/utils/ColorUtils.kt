@@ -10,7 +10,7 @@ object ColorUtils {
         return if (isLightColor()) Color.Black else Color.White
     }
 
-    fun Color.isLightColor(): Boolean {
+    private fun Color.isLightColor(): Boolean {
         val contrastForBlack = calculateContrast(foreground = Color.Black)
         val contrastForWhite = calculateContrast(foreground = Color.White)
         return contrastForBlack > contrastForWhite

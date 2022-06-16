@@ -7,18 +7,11 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import javax.inject.Inject
 
-interface FakeGPSRestApiService {
+class FakeGPSRestApiService @Inject constructor(
+    private val retrofit: FakeGPSRestApi
+){
 
     suspend fun checkCurrentLocation(
-        jsonBody: ApiRequestModel
-    ): ApiResponseModel
-}
-
-class FakeGPSRestApiServiceImpl @Inject constructor(
-    private val retrofit: FakeGPSRestApi
-) : FakeGPSRestApiService {
-
-    override suspend fun checkCurrentLocation(
         jsonBody: ApiRequestModel
     ): ApiResponseModel =
         retrofit.checkLocation(

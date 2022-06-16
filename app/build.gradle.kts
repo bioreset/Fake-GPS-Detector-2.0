@@ -56,7 +56,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:20.0.0")
 
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.4.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0-rc01")
 
     implementation("com.squareup.moshi:moshi:1.13.0")
     kapt("com.squareup.moshi:moshi-kotlin-codegen:1.13.0")
@@ -83,7 +83,7 @@ dependencies {
     implementation("androidx.compose.runtime:runtime-livedata:1.2.0-beta03")
     implementation("com.google.android.material:compose-theme-adapter-3:1.0.11")
     implementation("androidx.compose.material:material-icons-extended:1.2.0-beta03")
-    implementation("androidx.activity:activity-compose:1.4.0")
+    implementation("androidx.activity:activity-compose:1.5.0-rc01")
     implementation("androidx.navigation:navigation-compose:2.5.0-rc01")
     implementation("androidx.compose.ui:ui-tooling:1.2.0-beta03")
 

@@ -9,11 +9,12 @@ import com.dariusz.fakegpsdetector.utils.ResultUtils.showOnScreen
 @Composable
 fun MapScreen(viewModel: MapScreenViewModel = hiltViewModel()) {
 
-    val mapData = viewModel.locationData.collectAsState()
+    val locationData = viewModel.locationData.collectAsState()
 
-    mapData.showOnScreen {
-        CityMapView(it.latitude.toString(), it.longitude.toString())
+    locationData.showOnScreen {
+        CityMapView(
+            it.latitude.toString(),
+            it.longitude.toString()
+        )
     }
-
 }
-

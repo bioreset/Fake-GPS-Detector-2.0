@@ -5,7 +5,9 @@ import com.dariusz.fakegpsdetector.data.local.sensor.requirements.PermissionsSta
 import com.dariusz.fakegpsdetector.data.local.sensor.requirements.WifiStatusData
 import com.dariusz.fakegpsdetector.utils.Constants.permissionsToWatch
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class RequirementsRepository
 @Inject constructor(
     private val gpsStatusData: GpsStatusData,

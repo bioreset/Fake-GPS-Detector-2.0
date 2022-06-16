@@ -7,20 +7,16 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
-interface GpsStatusData {
-
-    val currentGpsStatus: Flow<GpsStatusModel>
-
-}
-
-class GpsStatusDataImpl
+@Singleton
+class GpsStatusData
 @Inject
 constructor(
     @ApplicationContext private val context: Context
-) : GpsStatusData {
+)  {
 
-    override val currentGpsStatus: Flow<GpsStatusModel> = context.liveGpsStatus()
+    val currentGpsStatus: Flow<GpsStatusModel> = context.liveGpsStatus()
 
     private fun Context.liveGpsStatus(): Flow<GpsStatusModel> {
         val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager

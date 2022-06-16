@@ -31,25 +31,17 @@ constructor(
         permissionsStatus,
         wifiNetworkStatus
     ) { gps, perm, wifi ->
-        RequirementsStatus.Success(gps, perm, wifi)
+        RequirementsStatus(gps, perm, wifi)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = RequirementsStatus.NotYet
+        initialValue = RequirementsStatus()
     )
 
 }
 
-sealed class RequirementsStatus {
-
-    data class Success(
-        val gpsStatusModel: GpsStatusModel,
-        val permissionStatusModel: PermissionStatusModel,
-        val wifiStatusModel: WifiStatusModel
-    ) : RequirementsStatus()
-
-    object NotYet : RequirementsStatus()
-
-}
-
-
+data class RequirementsStatus(
+    val gpsStatusModel: GpsStatusModel = GpsStatusModel(),
+    val permissionStatusModel: PermissionStatusModel = PermissionStatusModel(),
+    val wifiStatusModel: WifiStatusModel = WifiStatusModel()
+)

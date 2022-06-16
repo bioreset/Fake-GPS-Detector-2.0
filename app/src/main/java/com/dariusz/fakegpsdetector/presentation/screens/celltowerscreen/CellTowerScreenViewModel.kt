@@ -11,25 +11,17 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CellTowerScreenViewModel
 @Inject
 constructor(
-    private val cellTowersDataRepository: CellTowersDataRepository
+    cellTowersDataRepository: CellTowersDataRepository
 ) : ViewModel() {
 
-    lateinit var cellTowers: StateFlow<Result<List<CellInfo>>>
+    val cellTowers: StateFlow<Result<List<CellInfo>>> = cellTowersDataRepository
+        .getCellTowers(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+        .asResult(viewModelScope)
 
-    init {
-        viewModelScope.launch { getCellTowersData() }
-    }
-
-    private suspend fun getCellTowersData() {
-        cellTowers = cellTowersDataRepository
-            .getCellTowers(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            .asResult(viewModelScope)
-    }
 }

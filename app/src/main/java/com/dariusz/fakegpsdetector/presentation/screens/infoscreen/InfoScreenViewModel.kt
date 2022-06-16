@@ -1,9 +1,14 @@
 package com.dariusz.fakegpsdetector.presentation.screens.infoscreen
 
-import android.annotation.SuppressLint
 import android.os.Build
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.snapshots.Snapshot.Companion.withMutableSnapshot
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.SavedStateHandleSaveableApi
+import androidx.lifecycle.viewmodel.compose.saveable
 import com.dariusz.fakegpsdetector.domain.model.*
 import com.dariusz.fakegpsdetector.domain.model.RoutersListModel.Companion.newRoutersList
 import com.dariusz.fakegpsdetector.domain.repository.CellTowersDataRepository
@@ -13,98 +18,50 @@ import com.dariusz.fakegpsdetector.domain.repository.WifiNodesRepository
 import com.dariusz.fakegpsdetector.utils.CellTowersUtils.mapCellTowers
 import com.dariusz.fakegpsdetector.utils.ResultUtils.asResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class InfoScreenViewModel
 @Inject
 constructor(
-    private val locationFromApiResponseRepository: LocationFromApiResponseRepository,
-    private val locationRepository: LocationRepository,
-    private val wifiNodesRepository: WifiNodesRepository,
-    private val cellTowersRepository: CellTowersDataRepository
+    locationFromApiResponseRepository: LocationFromApiResponseRepository,
+    locationRepository: LocationRepository,
+    wifiNodesRepository: WifiNodesRepository,
+    cellTowersRepository: CellTowersDataRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    lateinit var currentLocation: StateFlow<LocationModel>
-
-    lateinit var currentRouters: StateFlow<List<RoutersListModel>>
-
-    lateinit var currentCellTowers: StateFlow<List<CellTowerModel>>
-
-    var apiResponse: StateFlow<ApiResponseModel>
-
-    init {
-        apiResponse = MutableStateFlow(ApiResponseModel(LocationData(0.0, 0.0), 0.0)).asStateFlow()
-        viewModelScope.launch {
-            getLocationData()
-            getCellTowersData()
-            getWifiNodesData()
-            submitRequest()
-        }
+    private var apiRequest by savedStateHandle.saveable {
+        mutableStateOf(ApiRequestModel(listOf(), listOf()))
     }
 
-    val infoScreenData: StateFlow<Result<InfoScreenData>> = combine(
-        currentLocation,
-        currentCellTowers,
-        currentRouters
-    ) { location, cellTowers, routers ->
-        InfoScreenData(location, cellTowers, routers)
+    val viewState: StateFlow<Result<InfoScreenViewState>> = combine(
+        locationRepository.getLocationData(),
+        wifiNodesRepository.getWifiNodes(),
+        cellTowersRepository.getCellTowers(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q),
+        snapshotFlow { apiRequest }
+            .flatMapLatest {
+                locationFromApiResponseRepository.checkCurrentLocationOfTheDevice(it)
+            }
+    ) { locationData, wifinodes, celltowers, apiResponse ->
+        val cellTowersList = mapCellTowers(celltowers)
+        val wifiNodesList = newRoutersList(wifinodes)
+        InfoScreenViewState(
+            currentLocationData = locationData,
+            cellTowers = cellTowersList,
+            wifiNodes = wifiNodesList,
+            apiResponseModel = apiResponse
+        )
     }
         .asResult(viewModelScope)
 
-
-    private suspend fun getLocationData() {
-        currentLocation = locationRepository
-            .getLocationData()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = LocationModel(0.0, 0.0)
-            )
-    }
-
-    @SuppressLint("NewApi")
-    private suspend fun getCellTowersData() {
-        currentCellTowers = cellTowersRepository
-            .getCellTowers(Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
-            .map { mapCellTowers(it) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = listOf()
-            )
-    }
-
-    @SuppressLint("NewApi")
-    private suspend fun getWifiNodesData() {
-        currentRouters = wifiNodesRepository
-            .getWifiNodes()
-            .map { newRoutersList(it) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = listOf()
-            )
-    }
-
-    suspend fun submitRequest(
-        cellTowers: List<CellTowerModel> = currentCellTowers.value,
-        wifiNodes: List<RoutersListModel> = currentRouters.value
-    ) {
-        apiResponse = locationFromApiResponseRepository
-            .checkCurrentLocationOfTheDevice(ApiRequestModel(wifiNodes, cellTowers))
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = ApiResponseModel(LocationData(0.0, 0.0), 0.0)
-            )
-    }
 }
 
-data class InfoScreenData(
-    val currentLocationData: LocationModel,
-    val cellTowers: List<CellTowerModel>,
-    val wifiNodes: List<RoutersListModel>
+data class InfoScreenViewState(
+    val currentLocationData: LocationModel? = null,
+    val cellTowers: List<CellTowerModel>? = listOf(),
+    val wifiNodes: List<RoutersListModel>? = listOf(),
+    val apiResponseModel: ApiResponseModel? = null
 )

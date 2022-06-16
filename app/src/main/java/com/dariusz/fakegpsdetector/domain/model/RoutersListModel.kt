@@ -18,8 +18,8 @@ data class RoutersListModel(
     val qualityOfConnection: String? = ""
 ) {
     companion object {
-        fun newRoutersList(rmdl: List<ScanResult>): List<RoutersListModel> {
-            return rmdl.map {
+        fun newRoutersList(rmdl: List<ScanResult>?): List<RoutersListModel> {
+            return rmdl?.map {
                 RoutersListModel(
                     ssid = it.SSID + " (" + (when (it.frequency) {
                         in 2401..2495 -> "2,4"
@@ -75,6 +75,7 @@ data class RoutersListModel(
                     })
                 )
             }
+                ?: listOf()
         }
     }
 }

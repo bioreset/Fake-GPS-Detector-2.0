@@ -7,20 +7,16 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
-interface WifiStatusData {
-
-    val currentWifiStatus: Flow<WifiStatusModel>
-
-}
-
-class WifiStatusDataImpl
+@Singleton
+class WifiStatusData
 @Inject
 constructor(
     @ApplicationContext private val context: Context
-) : WifiStatusData {
+) {
 
-    override val currentWifiStatus: Flow<WifiStatusModel> = context.liveWifiStatus()
+    val currentWifiStatus: Flow<WifiStatusModel> = context.liveWifiStatus()
 
     private fun Context.liveWifiStatus(): Flow<WifiStatusModel> {
         val wifiManager = getSystemService(Context.WIFI_SERVICE) as? WifiManager

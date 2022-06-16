@@ -16,7 +16,6 @@ import com.dariusz.fakegpsdetector.domain.model.GpsStatusModel
 import com.dariusz.fakegpsdetector.domain.model.PermissionStatusModel
 import com.dariusz.fakegpsdetector.domain.model.WifiStatusModel
 import com.dariusz.fakegpsdetector.presentation.MainViewModel
-import com.dariusz.fakegpsdetector.presentation.RequirementsStatus
 
 @Composable
 fun MainAlertBox() {
@@ -27,17 +26,12 @@ fun MainAlertBox() {
 
     val requirementsStatus by viewModel.requirementsStatus.collectAsState()
 
-    when (requirementsStatus) {
-        is RequirementsStatus.Success -> {
-            ShowAlerts(
-                context = currentContext,
-                gpsStatusModel = (requirementsStatus as RequirementsStatus.Success).gpsStatusModel,
-                wifiStatusModel = (requirementsStatus as RequirementsStatus.Success).wifiStatusModel,
-                permissionStatusModel = (requirementsStatus as RequirementsStatus.Success).permissionStatusModel
-            )
-        }
-        else -> {}
-    }
+    ShowAlerts(
+        context = currentContext,
+        gpsStatusModel = requirementsStatus.gpsStatusModel,
+        wifiStatusModel = requirementsStatus.wifiStatusModel,
+        permissionStatusModel = requirementsStatus.permissionStatusModel
+    )
 }
 
 @Composable

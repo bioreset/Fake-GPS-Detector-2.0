@@ -11,29 +11,23 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
-import kotlin.properties.Delegates
-
-interface LocationData {
-
-    suspend fun getCurrentLocation(): Flow<LocationModel>
-
-}
+import javax.inject.Singleton
 
 @SuppressLint("MissingPermission")
-class LocationDataImpl
+@Singleton
+class LocationData
 @Inject
 constructor(
     @ApplicationContext private val context: Context
-) : LocationData {
+) {
 
-    override suspend fun getCurrentLocation(): Flow<LocationModel> {
+    fun getCurrentLocation(): Flow<LocationModel> {
         val fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(context)
         return fusedLocationProviderClient.getCurrentLocationAsFlow()
-
     }
 
-    private suspend fun FusedLocationProviderClient.getCurrentLocationAsFlow(): Flow<LocationModel> =
+    private fun FusedLocationProviderClient.getCurrentLocationAsFlow(): Flow<LocationModel> =
         callbackFlow {
             val locationRequest: LocationRequest = LocationRequest.create()
                 .apply {

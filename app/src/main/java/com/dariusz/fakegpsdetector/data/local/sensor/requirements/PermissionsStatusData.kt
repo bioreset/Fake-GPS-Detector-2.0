@@ -8,20 +8,16 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
-interface PermissionsStatusData {
-
-    fun getPermissionStatus(permissionsToListen: List<String>): Flow<PermissionStatusModel>
-
-}
-
-class PermissionsStatusDataImpl
+@Singleton
+class PermissionsStatusData
 @Inject
 constructor(
     @ApplicationContext private val context: Context
-) : PermissionsStatusData {
+) {
 
-    override fun getPermissionStatus(permissionsToListen: List<String>): Flow<PermissionStatusModel> =
+    fun getPermissionStatus(permissionsToListen: List<String>): Flow<PermissionStatusModel> =
         context.livePermissionsStatus(permissionsToListen)
 
     private fun Context.livePermissionsStatus(permissionsToListen: List<String>): Flow<PermissionStatusModel> =
