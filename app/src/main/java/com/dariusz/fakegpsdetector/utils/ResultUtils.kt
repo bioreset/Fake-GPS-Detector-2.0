@@ -9,14 +9,19 @@ import com.dariusz.fakegpsdetector.presentation.components.common.LoadingCompone
 import com.dariusz.fakegpsdetector.utils.ErrorHandling.logError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 
+@OptIn(ExperimentalCoroutinesApi::class)
 object ResultUtils {
 
     fun <T> Flow<T>.asResult(
         coroutineScope: CoroutineScope
     ): StateFlow<Result<T>> {
         return this
+            .onStart {
+                delay(1000)
+            }
             .map<T, Result<T>> {
                 Log.d("flow-data-result", it.toString())
                 Result.Success(it)
@@ -26,7 +31,7 @@ object ResultUtils {
             }
             .stateIn(
                 scope = coroutineScope,
-                started = SharingStarted.WhileSubscribed(5_000),
+                started = SharingStarted.WhileSubscribed(5000),
                 initialValue = Result.Loading
             )
     }
@@ -44,7 +49,6 @@ object ResultUtils {
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     private inline fun <T> Flow<T>.catchAndEmit(crossinline action: (Throwable) -> Unit): Flow<T> =
         flatMapLatest {
             flow { emit(it) }
@@ -53,6 +57,5 @@ object ResultUtils {
                     action(it)
                 }
         }
-
 
 }
