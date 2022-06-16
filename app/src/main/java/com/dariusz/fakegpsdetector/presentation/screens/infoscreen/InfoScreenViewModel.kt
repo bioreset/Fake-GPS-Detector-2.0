@@ -3,7 +3,10 @@ package com.dariusz.fakegpsdetector.presentation.screens.infoscreen
 import android.os.Build
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dariusz.fakegpsdetector.domain.model.*
+import com.dariusz.fakegpsdetector.domain.model.ApiRequestModel
+import com.dariusz.fakegpsdetector.domain.model.ApiResponseModel
+import com.dariusz.fakegpsdetector.domain.model.LocationModel
+import com.dariusz.fakegpsdetector.domain.model.Result
 import com.dariusz.fakegpsdetector.domain.model.RoutersListModel.Companion.newRoutersList
 import com.dariusz.fakegpsdetector.domain.repository.CellTowersDataRepository
 import com.dariusz.fakegpsdetector.domain.repository.LocationFromApiResponseRepository
@@ -13,7 +16,9 @@ import com.dariusz.fakegpsdetector.utils.CellTowersUtils.mapCellTowers
 import com.dariusz.fakegpsdetector.utils.ResultUtils.asResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import javax.inject.Inject
 
 @HiltViewModel
@@ -38,7 +43,7 @@ constructor(
         )
     }
         .flatMapLatest { it }
-        .combine(locationRepository.getLocationData()){ apiResponse, location ->
+        .combine(locationRepository.getLocationData()) { apiResponse, location ->
             InfoScreenState(
                 currentLocationData = location,
                 apiResponseModel = apiResponse

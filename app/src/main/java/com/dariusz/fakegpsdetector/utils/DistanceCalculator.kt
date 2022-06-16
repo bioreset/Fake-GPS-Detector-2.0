@@ -8,9 +8,9 @@ import kotlin.math.roundToInt
 object DistanceCalculator {
 
     fun getFinalResult(
-       locationOne: LocationModel?,
-       locationTwo: LocationData?,
-       accuracy: Double?
+        locationOne: LocationModel?,
+        locationTwo: LocationData?,
+        accuracy: Double?
     ): FinalResult {
 
         val locationNumberOne = Location("local")

@@ -12,8 +12,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dariusz.fakegpsdetector.domain.model.ApiResponseModel
 import com.dariusz.fakegpsdetector.domain.model.LocationModel
-import com.dariusz.fakegpsdetector.presentation.components.common.BaseDetail
-import com.dariusz.fakegpsdetector.utils.DistanceCalculator
 import com.dariusz.fakegpsdetector.utils.DistanceCalculator.getFinalResult
 import com.dariusz.fakegpsdetector.utils.ResultUtils.showOnScreen
 
@@ -52,11 +50,11 @@ private fun ManageApiResponse(
 ) {
     val result = getFinalResult(currentLocation, apiResponse?.location, apiResponse?.accuracy)
     val verdict = if (result.isSpoofed) "Valid" else "Spoofed"
-    Column (
+    Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
-    ){
+    ) {
         Text("Current location: ", style = TextStyle(fontWeight = FontWeight.Bold))
         Text("Latitude: ${currentLocation?.latitude}, Longitude: ${currentLocation?.longitude}")
         Spacer(modifier = Modifier.height(15.dp))
